@@ -1,13 +1,14 @@
 // FIXME put the constants somewhere sensible
 var k = 1;
 var vel = 1;
-var gestation = 20;
+var gestation = 5;
 var nagSize = 1;
 
 var random = new PcgRandom(Date.now());
+var canvas;
 
 var main = function () {
-	var canvas = document.querySelector("#world");
+	canvas = document.querySelector("#world");
 	var context = canvas.getContext("2d");
 	var w = new World(context);
 	w.run();
@@ -37,12 +38,12 @@ World.prototype = {
 		//this.nagList.push(new Nag(0, 0.5, 0, 0, 0, { x:240, y:250 }, Math.PI/2))
 		//this.nagList.push(new Nag(0, 0.8, 0, 0, 0, { x:280, y:250 }, Math.PI/2))
 		//this.nagList.push(new Nag(0, 1, 0, 0, 0, { x:320, y:250 }, Math.PI/2))
-		for (var i = 0; i < 10; ++i) {
+		for (var i = 0; i < 20; ++i) {
 			this.nagList.push(new Nag(Nag.prototype.normalDistRand(),
 																random.number(),
-																random.number()*0.1,
-																random.number()*0.03,
-																Nag.prototype.normalDistRand(),
+																random.number(),
+																random.number(),
+																Nag.prototype.normalDistRand()*Math.PI*2,
 																{ x: random.number()*this.width,
 																	y: random.number()*this.height },
 																random.number()*Math.PI*2));
@@ -53,13 +54,15 @@ World.prototype = {
 		if (this.nagList.length > 0) {
 			requestAnimationFrame(this.step.bind(this));
 			var newNagList = [];
+			var imgData = this.context.getImageData(0,0, this.width, this.height).data;
 			for (var i = 0; i < this.nagList.length; i++) {
 				// get the current nag
 				var nag = this.nagList[i];
 				nag.iteratePosition();
 				// whatever nags come back from the update call,
 				// aggregate them into our new list of nags.
-				var nags = nag.surviveAndBreed(this.context.getImageData(nag.p.x, nag.p.y, 1, 1).data);
+				
+				var nags = nag.surviveAndBreed(imgData);
 
 				// if it's old enough, we draw it
 				if (nag.age > gestation) {
@@ -70,7 +73,8 @@ World.prototype = {
 				}
 			}
 			this.nagList = newNagList;
-			console.log("this timestep is:", this.timestep++);
+			//console.log("this timestep is:", this.timestep++);
+			//console.log("the nags are:", this.nagList);
 		}
 	},
 
@@ -88,12 +92,15 @@ Nag.prototype = {
 		// the genome
 		this.ro = this.bound(ro, -1, 1);
 		this.r =  this.bound(r, 0, 1);
-		this.f =  this.bound(f, 0, 1);
-		this.m =  this.bound(m, 0, 1);
+		this.f =  this.bound(f, 0, 0.1);
+		this.m =  this.bound(m, 0, 0.05);
 		this.phi = phi;
 		// end genome
 
-		this.p = pos;
+		this.p = {
+			x: pos.x,
+			y: pos.y
+		};
 		this.theta = theta;
 		this.dthetadt = 0;
 
@@ -101,10 +108,12 @@ Nag.prototype = {
 		this.age = 0;
 	},
 
-	surviveAndBreed: function (colorAtCurrentLocation) {
+	surviveAndBreed: function (imgData) {
 		// die?
 		// right now just tests for any red at all (FIXME does this work?)
-		if (this.processImgData(colorAtCurrentLocation) > 500 || random.number() < this.m) {
+		if (this.outOfBounds() ||
+				this.collision(imgData) ||
+				random.number() < this.m) {
 			return [];
 		} else {
 			this.returnedNags = [this];
@@ -137,23 +146,30 @@ Nag.prototype = {
 		return Math.max(Math.min(num, max), min);
 	},
 
-	processImgData: function (data) {
-		console.log("data is:", data, data.length);
-		var sum = 0;
-		for (var i = 3; i < data.length; i+=4) {
-			sum += data[i];
+	collision: function (data) {
+		var p1 = data[4*canvas.width*Math.floor(this.p.y)+4*Math.floor(this.p.x)+3]
+		var p2 = data[4*canvas.width*Math.floor(this.p.y)+4*Math.ceil(this.p.x)+3]
+		var p3 = data[4*canvas.width*Math.ceil(this.p.y)+4*Math.floor(this.p.x)+3]
+		var p4 = data[4*canvas.width*Math.ceil(this.p.y)+4*Math.ceil(this.p.x)+3]
+		// 500 is arbitrary
+		return (p1+p2+p3+p4)>500;
+	},
+
+	outOfBounds: function () {
+		if (this.p.x < 0 || this.p.y < 0 || this.p.x > canvas.width || this.p.y > canvas.height) {
+			return true;
+		} else {
+			return false;
 		}
-		return sum;
 	},
 
 	bearOffspring: function () {
-		// FIXME bounds for ro and r are arbitrary
-		return new Nag(this.ro+this.normalDistRand(),
-									 this.r+this.normalDistRand(),
-									 this.f+this.normalDistRand(),
-									 this.m+this.normalDistRand(),
-									 this.phi+this.normalDistRand(),
-									 this.pos,
+		return new Nag(this.ro+this.normalDistRand()*0.1,
+									 this.r+this.normalDistRand()*0.1,
+									 this.f+this.normalDistRand()*0.05,
+									 this.m+this.normalDistRand()*0.1,
+									 this.phi+this.normalDistRand()*Math.PI*0.1,
+									 this.p,
 									 this.theta+this.phi);
 	},
 
