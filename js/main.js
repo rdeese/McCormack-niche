@@ -1,18 +1,23 @@
 // FIXME put the constants somewhere sensible
 var k = 1;
 var vel = 1;
-var gestation = 5;
+var gestation = 3;
 var nagSize = 1;
+var useNiche = true;
+var nicheWidth = 50;
+var nicheAreaSize = 10;
 
 var random = new PcgRandom(Date.now());
 var canvas;
 
 var main = function () {
 	canvas = document.querySelector("#world");
+  canvas.width = document.documentElement.clientWidth-20;
+  canvas.height = document.documentElement.clientHeight-20;
 	var context = canvas.getContext("2d");
 	var w = new World(context);
 	w.run();
-}
+};
 
 var World = function (context) {
 	this.init(context);
@@ -38,12 +43,13 @@ World.prototype = {
 		//this.nagList.push(new Nag(0, 0.5, 0, 0, 0, { x:240, y:250 }, Math.PI/2))
 		//this.nagList.push(new Nag(0, 0.8, 0, 0, 0, { x:280, y:250 }, Math.PI/2))
 		//this.nagList.push(new Nag(0, 1, 0, 0, 0, { x:320, y:250 }, Math.PI/2))
-		for (var i = 0; i < 20; ++i) {
-			this.nagList.push(new Nag(Nag.prototype.normalDistRand(),
+		for (var i = 0; i < 100; ++i) {
+			this.nagList.push(new Nag((random.number()-0.5),
 																random.number(),
 																random.number(),
 																random.number(),
-																Nag.prototype.normalDistRand()*Math.PI*2,
+																(random.number()-0.5)*Math.PI*2,
+                                random.number()*0.2,
 																{ x: random.number()*this.width,
 																	y: random.number()*this.height },
 																random.number()*Math.PI*2));
@@ -61,7 +67,7 @@ World.prototype = {
 				nag.iteratePosition();
 				// whatever nags come back from the update call,
 				// aggregate them into our new list of nags.
-				
+
 				var nags = nag.surviveAndBreed(imgData);
 
 				// if it's old enough, we draw it
@@ -81,20 +87,21 @@ World.prototype = {
 	run: function () {
 		this.step();
 	}
-}
+};
 
-var Nag = function (ro, r, f, m, phi, pos, theta) { // curvature, irrationality, fecundity, mortality, offset
-	this.init(ro, r, f, m, phi, pos, theta);
-}
+var Nag = function (ro, r, f, m, phi, delta, pos, theta) { // curvature, irrationality, fecundity, mortality, offset, niche
+	this.init(ro, r, f, m, phi, delta, pos, theta);
+};
 
 Nag.prototype = {
-	init: function (ro, r, f, m, phi, pos, theta) {
+	init: function (ro, r, f, m, phi, delta, pos, theta) {
 		// the genome
 		this.ro = this.bound(ro, -1, 1);
 		this.r =  this.bound(r, 0, 1);
-		this.f =  this.bound(f, 0, 0.1);
-		this.m =  this.bound(m, 0, 0.05);
+		this.f =  this.bound(f, 0, 1);
+		this.m =  this.bound(m, 0, 1);
 		this.phi = phi;
+    this.delta = this.bound(delta, 0, 1);
 		// end genome
 
 		this.p = {
@@ -109,17 +116,18 @@ Nag.prototype = {
 	},
 
 	surviveAndBreed: function (imgData) {
+    var probs = this.deathAndReproductionProb(imgData);
 		// die?
-		// right now just tests for any red at all (FIXME does this work?)
 		if (this.outOfBounds() ||
 				this.collision(imgData) ||
-				random.number() < this.m) {
+				random.number() < probs.death) {
+      //console.log("niche was:", this.delta);
 			return [];
 		} else {
 			this.returnedNags = [this];
 		}
 		// reproduce?
-		if (random.number() < this.f) {
+		if (random.number() < probs.reproduction) {
 			this.returnedNags.push(this.bearOffspring());
 		}
 		// get older
@@ -128,9 +136,27 @@ Nag.prototype = {
 		return this.returnedNags;
 	},
 
+  deathAndReproductionProb: function (imgData) {
+    if (useNiche) {
+      var nicheFactor = Math.pow(Math.cos(this.bound(2*Math.PI*(this.localDensity(imgData)-this.delta),
+                                                     -Math.PI/2,
+                                                     Math.PI/2)), nicheWidth);
+      return {
+        death: 5*this.m * (1-nicheFactor),
+        reproduction: this.f * nicheFactor,
+        nicheFactor: nicheFactor
+      };
+    } else {
+      return {
+        death: this.m,
+        reproduction: this.f
+      };
+    }
+  },
+
 	// attempt at the fracSum function described in the paper. I assum the second argument
 	// to the function is determining the number of octaves, but I could be totally wrong.
-	fracSum(p, octaves) {
+	fracSum: function (p, octaves) {
 		PerlinSimplex.noiseDetail(Math.floor(octaves), 0.5);
 		return PerlinSimplex.noise(p.x, p.y);
 	},
@@ -146,14 +172,38 @@ Nag.prototype = {
 		return Math.max(Math.min(num, max), min);
 	},
 
+  // using 4 pixels on the canvas that the nag is over, determines if the
+  // nag is colliding with a line
 	collision: function (data) {
-		var p1 = data[4*canvas.width*Math.floor(this.p.y)+4*Math.floor(this.p.x)+3]
-		var p2 = data[4*canvas.width*Math.floor(this.p.y)+4*Math.ceil(this.p.x)+3]
-		var p3 = data[4*canvas.width*Math.ceil(this.p.y)+4*Math.floor(this.p.x)+3]
-		var p4 = data[4*canvas.width*Math.ceil(this.p.y)+4*Math.ceil(this.p.x)+3]
+		var p1 = data[4*canvas.width*Math.floor(this.p.y)+4*Math.floor(this.p.x)+3];
+		var p2 = data[4*canvas.width*Math.floor(this.p.y)+4*Math.ceil(this.p.x)+3];
+		var p3 = data[4*canvas.width*Math.ceil(this.p.y)+4*Math.floor(this.p.x)+3];
+		var p4 = data[4*canvas.width*Math.ceil(this.p.y)+4*Math.ceil(this.p.x)+3];
 		// 500 is arbitrary
-		return (p1+p2+p3+p4)>500;
+		return (p1+p2+p3+p4)>300;
 	},
+
+  // returns the ratio of 'inked' area to total area around the nag. "area around
+  // the nag" is a square with side length given by the global constant nicheAreaSize
+  localDensity: function (data) {
+    xStart = Math.floor(this.p.x-nicheAreaSize/2);
+    xEnd = Math.ceil(this.p.x+nicheAreaSize/2);
+    yStart = Math.floor(this.p.y-nicheAreaSize/2);
+    yEnd = Math.ceil(this.p.y+nicheAreaSize/2);
+    var totalArea = 0;
+    // since a single "black pixel" is sometimes averaged over multiple pixels, we'll
+    // try adding up the total opacity within the area, and getting a count by
+    // dividing by 255
+    var inkedOpacityCount = 0;
+    for (var x = xStart; x < xEnd; x++) {
+      for (var y = yStart; y < yEnd; y++) {
+        inkedOpacityCount += data[4*canvas.width*y+4*x+3];
+        totalArea++;
+      }
+    }
+    var density = (inkedOpacityCount / 255) / totalArea;
+    return density;
+  },
 
 	outOfBounds: function () {
 		if (this.p.x < 0 || this.p.y < 0 || this.p.x > canvas.width || this.p.y > canvas.height) {
@@ -164,11 +214,22 @@ Nag.prototype = {
 	},
 
 	bearOffspring: function () {
-		return new Nag(this.ro+this.normalDistRand()*0.1,
-									 this.r+this.normalDistRand()*0.1,
-									 this.f+this.normalDistRand()*0.05,
-									 this.m+this.normalDistRand()*0.1,
-									 this.phi+this.normalDistRand()*Math.PI*0.1,
+/*
+		return new Nag(this.ro+this.normalDistRand(),
+									 this.r+this.normalDistRand(),
+									 this.f+this.normalDistRand(),
+									 this.m+this.normalDistRand(),
+									 this.phi+this.normalDistRand(),
+                   this.delta+this.normalDistRand(),
+									 this.p,
+									 this.theta+this.phi);
+*/
+		return new Nag(this.ro+this.normalDistRand()*0.08,
+									 this.r+this.normalDistRand()*0.4,
+									 this.f+this.normalDistRand()*0.4,
+									 this.m+this.normalDistRand()*0.4,
+									 this.phi+this.normalDistRand()*0.4,
+                   this.delta+this.normalDistRand()*0.4,
 									 this.p,
 									 this.theta+this.phi);
 	},
