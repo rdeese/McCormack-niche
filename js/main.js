@@ -1,10 +1,10 @@
 // FIXME put the constants somewhere sensible
 var k = 1;
 var vel = 1;
-var gestation = 3;
+var gestation = 6;
 var nagSize = 1;
 var useNiche = true;
-var nicheWidth = 50;
+var nicheWidth = 10;
 var nicheAreaSize = 10;
 
 var random = new PcgRandom(Date.now());
@@ -43,13 +43,13 @@ World.prototype = {
 		//this.nagList.push(new Nag(0, 0.5, 0, 0, 0, { x:240, y:250 }, Math.PI/2))
 		//this.nagList.push(new Nag(0, 0.8, 0, 0, 0, { x:280, y:250 }, Math.PI/2))
 		//this.nagList.push(new Nag(0, 1, 0, 0, 0, { x:320, y:250 }, Math.PI/2))
-		for (var i = 0; i < 100; ++i) {
-			this.nagList.push(new Nag((random.number()-0.5),
-																random.number(),
-																random.number(),
-																random.number(),
+		for (var i = 0; i < 40; ++i) {
+			this.nagList.push(new Nag(0.05*(random.number()-0.5),
+																0.3*random.number(),
+																0.1*random.number(),
+																0.05*random.number(),
 																(random.number()-0.5)*Math.PI*2,
-                                random.number()*0.2,
+                                random.number()*0.1,
 																{ x: random.number()*this.width,
 																	y: random.number()*this.height },
 																random.number()*Math.PI*2));
@@ -225,11 +225,11 @@ Nag.prototype = {
 									 this.theta+this.phi);
 */
 		return new Nag(this.ro+this.normalDistRand()*0.08,
-									 this.r+this.normalDistRand()*0.4,
-									 this.f+this.normalDistRand()*0.4,
-									 this.m+this.normalDistRand()*0.4,
-									 this.phi+this.normalDistRand()*0.4,
-                   this.delta+this.normalDistRand()*0.4,
+									 this.r+this.normalDistRand()*0.05,
+									 this.f+this.normalDistRand()*0.05,
+									 this.m+this.normalDistRand()*0.05,
+									 this.phi+this.normalDistRand()*0.05,
+                   this.delta+this.normalDistRand()*0.05,
 									 this.p,
 									 this.theta+this.phi);
 	},
