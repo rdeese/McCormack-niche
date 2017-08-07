@@ -1,11 +1,12 @@
 // FIXME put the constants somewhere sensible
 var k = 1;
-var vel = 1;
-var gestation = 6;
-var nagSize = 1;
+var vel = 2;
+var gestation = 2;
+var nagSize = 2;
 var useNiche = true;
-var nicheWidth = 10;
-var nicheAreaSize = 10;
+var nicheWidth = 200;
+var nicheAreaSize = 5;
+var numNags = 10;
 
 var random = new PcgRandom(Date.now());
 var canvas;
@@ -43,16 +44,16 @@ World.prototype = {
 		//this.nagList.push(new Nag(0, 0.5, 0, 0, 0, { x:240, y:250 }, Math.PI/2))
 		//this.nagList.push(new Nag(0, 0.8, 0, 0, 0, { x:280, y:250 }, Math.PI/2))
 		//this.nagList.push(new Nag(0, 1, 0, 0, 0, { x:320, y:250 }, Math.PI/2))
-		for (var i = 0; i < 40; ++i) {
-			this.nagList.push(new Nag(0.05*(random.number()-0.5),
-																0.3*random.number(),
-																0.1*random.number(),
-																0.05*random.number(),
-																(random.number()-0.5)*Math.PI*2,
-                                random.number()*0.1,
-																{ x: random.number()*this.width,
-																	y: random.number()*this.height },
-																random.number()*Math.PI*2));
+		for (var i = 0; i < numNags; ++i) {
+      this.nagList.push(new Nag(
+        0, // curvature
+        0.5*random.number(), // irrationality
+        0.8+0.2*random.number(), // fecundity,
+        0*random.number(), // mortality
+        (random.number()-0.5)*Math.PI*2, // offset
+        0.1*random.number(), // niche
+        { x: random.number()*this.width, y: random.number()*this.height }, // position
+        random.number()*Math.PI*2)); // rotation
 		}
 	},
 
@@ -81,6 +82,10 @@ World.prototype = {
 			this.nagList = newNagList;
 			//console.log("this timestep is:", this.timestep++);
 			//console.log("the nags are:", this.nagList);
+      let avgF = this.nagList.reduce((sum, nag) => { return sum += nag.f }, 0)/this.nagList.length;
+      let avgNiche = this.nagList.reduce((sum, nag) => { return sum += nag.delta }, 0)/this.nagList.length;
+      let avgM = this.nagList.reduce((sum, nag) => { return sum += nag.m }, 0)/this.nagList.length;
+      console.log("f", avgF.toFixed(2), "m", avgM.toFixed(2), "niche", avgNiche.toFixed(4))
 		}
 	},
 
@@ -138,11 +143,17 @@ Nag.prototype = {
 
   deathAndReproductionProb: function (imgData) {
     if (useNiche) {
-      var nicheFactor = Math.pow(Math.cos(this.bound(2*Math.PI*(this.localDensity(imgData)-this.delta),
-                                                     -Math.PI/2,
-                                                     Math.PI/2)), nicheWidth);
+      let differenceFromPreference = this.localDensity(imgData)-this.delta;
+      var nicheFactor = Math.pow(
+        Math.cos(this.bound(
+          2*Math.PI*(differenceFromPreference),
+          -Math.PI/2,
+          Math.PI/2
+        )),
+        nicheWidth
+      )
       return {
-        death: 5*this.m * (1-nicheFactor),
+        death: this.m * (1-nicheFactor),
         reproduction: this.f * nicheFactor,
         nicheFactor: nicheFactor
       };
@@ -164,8 +175,13 @@ Nag.prototype = {
 	// returns a random float drawn from an approximate standard normal distribution
 	// as per the central limit theorem (std. dev. 1, mean 0)
 	normalDistRand: function () {
-		return ((random.number() + random.number() + random.number() +
-						 random.number() + random.number() + random.number()) - 3) / 3;
+    sample = (
+      random.number() + random.number() + random.number() +
+      random.number() + random.number() + random.number() -
+      3
+    ) / 3;
+    // console.log(sample)
+    return sample;
 	},
 
 	bound: function (num, min, max) {
@@ -179,8 +195,11 @@ Nag.prototype = {
 		var p2 = data[4*canvas.width*Math.floor(this.p.y)+4*Math.ceil(this.p.x)+3];
 		var p3 = data[4*canvas.width*Math.ceil(this.p.y)+4*Math.floor(this.p.x)+3];
 		var p4 = data[4*canvas.width*Math.ceil(this.p.y)+4*Math.ceil(this.p.x)+3];
+		let nextX = this.p.x + vel*Math.cos(this.theta);
+		let nextY = this.p.y + vel*Math.sin(this.theta);
+    // console.log(p1, p2, p3, p4);
 		// 500 is arbitrary
-		return (p1+p2+p3+p4)>300;
+		return (p1+p2+p3+p4)>255;
 	},
 
   // returns the ratio of 'inked' area to total area around the nag. "area around
@@ -197,11 +216,14 @@ Nag.prototype = {
     var inkedOpacityCount = 0;
     for (var x = xStart; x < xEnd; x++) {
       for (var y = yStart; y < yEnd; y++) {
-        inkedOpacityCount += data[4*canvas.width*y+4*x+3];
+        for (var z = 0; z < 4; z++) {
+          inkedOpacityCount += data[4*canvas.width*y+4*x+z];
+        }
         totalArea++;
       }
     }
     var density = (inkedOpacityCount / 255) / totalArea;
+    // console.log(density);
     return density;
   },
 
@@ -224,12 +246,12 @@ Nag.prototype = {
 									 this.p,
 									 this.theta+this.phi);
 */
-		return new Nag(this.ro+this.normalDistRand()*0.08,
-									 this.r+this.normalDistRand()*0.05,
-									 this.f+this.normalDistRand()*0.05,
-									 this.m+this.normalDistRand()*0.05,
-									 this.phi+this.normalDistRand()*0.05,
-                   this.delta+this.normalDistRand()*0.05,
+		return new Nag(this.ro+this.normalDistRand()*0.02,
+									 this.r+this.normalDistRand()*0.02,
+									 this.f+this.normalDistRand()*0.5,
+									 this.m+this.normalDistRand()*0.5,
+									 this.phi+this.normalDistRand()*0.02,
+                   this.delta+this.normalDistRand()*0.6,
 									 this.p,
 									 this.theta+this.phi);
 	},
@@ -243,7 +265,7 @@ Nag.prototype = {
 		//this.dthetadt = this.ro + Math.pow(this.fracSum(this.p, k*this.r), 0.89*Math.pow(this.r, 2));
 		this.dthetadt = this.ro + this.normalDistRand()*this.r;
 		// FIXME Arbitrarily bounding dthetadt by -1 and 1 rads/frame
-		this.dthetadt = this.bound(this.dthetadt, -1, 1);
+    // this.dthetadt = this.bound(this.dthetadt, -1, 1);
 
 		// update the heading and position of the nag
 		this.theta += this.dthetadt;
