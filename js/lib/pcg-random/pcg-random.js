@@ -127,7 +127,7 @@ var PcgRandom = (function() {
 		return ((xorshifted >>> rot) | (xorshifted << rot2)) >>> 0;
 	};
 
-	/// Get a uniformly distributed 32 bit integer between [0, max).
+	/// (Get a uniformly distributed 32 bit integer between [0, max).
 	PcgRandom.prototype.integer = function(max) {
 		if (!max) {
 			return this.next_();
@@ -160,5 +160,4 @@ var PcgRandom = (function() {
 	return PcgRandom;
 }());
 
-
-
+module.exports = PcgRandom;
