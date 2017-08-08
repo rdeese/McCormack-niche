@@ -71,11 +71,14 @@
 const OpenSimplexNoise = __webpack_require__(5).default;
 const { makeRectangle } = __webpack_require__(7);
 const QuadTree = __webpack_require__(8);
+let Canvas;
+let path;
+let fs;
 
 if (false) {
-  const Canvas = require('canvas');
-  const path = require('path');
-  const fs = require('fs');
+  Canvas = require('canvas');
+  path = require('path');
+  fs = require('fs');
 }
 
 let VEL = 1;
@@ -113,7 +116,6 @@ const getQueryParam = (variable) => {
       return decodeURIComponent(pair[1]);
     }
   }
-  console.log('Query variable %s not found', variable);
 }
 
 let node_main = function () {
@@ -146,7 +148,6 @@ let browser_main = function () {
   USE_NICHE  = getQueryParam("USE_NICHE ") || USE_NICHE;
   
 	canvas = document.querySelector("#world");
-  console.log(canvas);
   canvas.width = document.documentElement.clientWidth-20;
   canvas.height = document.documentElement.clientHeight-20;
   let context = canvas.getContext("2d");
@@ -175,13 +176,12 @@ World.prototype = {
 
     let openSimplex = new OpenSimplexNoise(Date.now());
     let noiseFunc = (x, y) => {
-      //return (openSimplex.noise2D(x, y) + 1) / 2;
       return openSimplex.noise2D(x, y);
     }
     this.noiseMaps = []
 
-    for (let i = 0; i <= 1; i += 0.5) {
-      this.noiseMaps.push(makeRectangle(this.width, this.height, noiseFunc.bind(this), { octaves: 1, persistence: i/2, frequency: 0.005 }));
+    for (let i = 0; i <= 1; i += 0.2) {
+      this.noiseMaps.push(makeRectangle(this.width, this.height, noiseFunc.bind(this), { octaves: 2, persistence: i/2, frequency: 0.005 }));
     }
 
 		this.populateNagList();
@@ -191,7 +191,7 @@ World.prototype = {
 	fracSum: function (x, y, r) {
     x = Math.floor(x);
     y = Math.floor(y);
-    let noiseMap = this.noiseMaps[Math.round(r*2)];
+    let noiseMap = this.noiseMaps[Math.round(r*5)];
     return noiseMap[x][y];
 	},
 
@@ -201,10 +201,10 @@ World.prototype = {
       this.nagList.push(new Nag(
         0, // curvature
         0.5*Math.random(), // irrationality
-        0.2+0.4*Math.random(), // fecundity,
-        0.1*Math.random(), // mortality
+        0.1+0.3*Math.random(), // fecundity,
+        0.01*Math.random(), // mortality
         2*Math.random()*Math.PI, // offset
-        0.05*Math.random(), // niche
+        0.2*Math.random(), // niche
         { x: Math.random()*this.width, y: Math.random()*this.height }, // position
         Math.random()*Math.PI*2)); // rotation
 		}
@@ -230,7 +230,7 @@ World.prototype = {
 
       // if it's old enough, we draw it
       if (nag.age > GESTATION) {
-        this.context.fillStyle = `rgb(0, 0, ${Math.floor(Math.pow(nag.delta, 1.5)*255*10)})`;
+        this.context.fillStyle = `rgb(0, ${Math.floor(Math.pow(nag.f, 1.5)*255*10)}, ${Math.floor(Math.pow(nag.delta, 1.5)*255*10)})`;
         this.context.fillRect(nag.x, nag.y, NAG_SIZE, NAG_SIZE);
       }
 
@@ -392,7 +392,7 @@ Nag.prototype = {
       this.ro, //+normalDistRand()*MUTATION_SEVERITY,
       this.r+normalDistRand()*MUTATION_SEVERITY,
       this.f+normalDistRand()*MUTATION_SEVERITY,
-      this.m+normalDistRand()*MUTATION_SEVERITY,
+      this.m+normalDistRand()*MUTATION_SEVERITY*MUTATION_SEVERITY,
       this.phi+normalDistRand()*MUTATION_SEVERITY,
       this.delta+normalDistRand()*MUTATION_SEVERITY,
       { x: this.x, y: this.y },
@@ -404,7 +404,7 @@ Nag.prototype = {
 	// coordinate space used has the 0 heading pointing ->, and positive increase
 	// in heading goes counterclockwise, like graph quadrants.
 	iteratePosition: function (fracSum) {
-    let randomChange = fracSum(this.x, this.y, this.r) * Math.pow(this.r, 3);
+    let randomChange = fracSum(this.x, this.y, this.r) * Math.pow(this.r, 2);
 		let dthetadt = this.ro + randomChange;
 
 		// update the heading and position of the nag
