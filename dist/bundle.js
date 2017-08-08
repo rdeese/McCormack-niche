@@ -155,9 +155,12 @@ let browser_main = function () {
 
   let animate = () => {
     w.step();
-    if (w.nagList.length > 0) {
-      requestAnimationFrame(animate);
+    if (w.nagList.length == 0) {
+      setTimeout(1000);
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      w = new World(context);
     }
+    requestAnimationFrame(animate);
   };
 
   animate();
@@ -230,7 +233,7 @@ World.prototype = {
 
       // if it's old enough, we draw it
       if (nag.age > GESTATION) {
-        this.context.fillStyle = `rgb(0, ${Math.floor(Math.pow(nag.f, 1.5)*255*10)}, ${Math.floor(Math.pow(nag.delta, 1.5)*255*10)})`;
+        this.context.fillStyle = `rgb(${Math.floor(Math.pow(nag.age/300, 2)*255)}, ${Math.floor(Math.pow(nag.f, 1)*255*2)}, ${Math.floor(Math.pow(nag.delta, 1.5)*255*10)})`;
         this.context.fillRect(nag.x, nag.y, NAG_SIZE, NAG_SIZE);
       }
 

@@ -19,10 +19,10 @@ let USE_NICHE = true;
 let NICHE_WIDTHS = [50, 100, 200];
 let NICHE_WIDTH = 100;
 let NICHE_AREA_SIZES = [40, 80, 160];
-let NICHE_AREA_SIZE = 80;
+let NICHE_AREA_SIZE = 120;
 let NUM_NAGS = 10;
 let MUTATION_SEVERITIES = [0.1, 0.2];
-let MUTATION_SEVERITY = 0.1;
+let MUTATION_SEVERITY = 0.3;
 let REPETITIONS = 2;
 let LOG_INTERVAL = 100;
 
@@ -86,9 +86,13 @@ let browser_main = function () {
 
   let animate = () => {
     w.step();
-    if (w.nagList.length > 0) {
-      requestAnimationFrame(animate);
+    if (w.nagList.length == 0) {
+      setTimeout(1000);
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      console.log("========== RESTART ===========");
+      w = new World(context);
     }
+    requestAnimationFrame(animate);
   };
 
   animate();
@@ -161,7 +165,7 @@ World.prototype = {
 
       // if it's old enough, we draw it
       if (nag.age > GESTATION) {
-        this.context.fillStyle = `rgb(0, ${Math.floor(Math.pow(nag.f, 1.5)*255*10)}, ${Math.floor(Math.pow(nag.delta, 1.5)*255*10)})`;
+        this.context.fillStyle = `rgb(${Math.floor(Math.pow(nag.age/300, 2)*255)}, ${Math.floor(Math.pow(nag.f, 1)*255*2)}, ${Math.floor(Math.pow(nag.delta, 1.5)*255*10)})`;
         this.context.fillRect(nag.x, nag.y, NAG_SIZE, NAG_SIZE);
       }
 
