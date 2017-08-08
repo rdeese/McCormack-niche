@@ -10,14 +10,14 @@ let VEL = 1;
 let GESTATION = 2;
 let NAG_SIZE = 1;
 let USE_NICHE = true;
-let NICHE_WIDTHS = [25, 50, 100];
+let NICHE_WIDTHS = [50, 100, 200];
 let NICHE_WIDTH;
-let NICHE_AREA_SIZES = [10, 20, 40, 80];
+let NICHE_AREA_SIZES = [40, 80, 160];
 let NICHE_AREA_SIZE;
 let NUM_NAGS = 10;
-let MUTATION_SEVERITIES = [0.05, 0.1, 0.2, 0.5];
+let MUTATION_SEVERITIES = [0.1, 0.2];
 let MUTATION_SEVERITY;
-let REPETITIONS = 1;
+let REPETITIONS = 2;
 let LOG_INTERVAL = 100;
 
 let canvas;
@@ -122,7 +122,7 @@ World.prototype = {
 
       // if it's old enough, we draw it
       if (nag.age > GESTATION) {
-        this.context.fillStyle = `rgb(${Math.floor(Math.pow(nag.delta, 1.5)*255*10)}, 0, 0)`;
+        this.context.fillStyle = `rgb(0, 0, ${Math.floor(Math.pow(nag.delta, 1.5)*255*10)})`;
         this.context.fillRect(nag.x, nag.y, NAG_SIZE, NAG_SIZE);
       }
 
