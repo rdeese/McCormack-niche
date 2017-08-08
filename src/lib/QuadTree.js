@@ -417,10 +417,4 @@ BoundsNode.prototype.clear = function () {
   //Object.getPrototypeOf(BoundsNode.prototype).clear.call(this);
 };
 
-if (typeof(window) !== 'undefined') {
-  (function (window) {
-    window.QuadTree = QuadTree;
-  }(window));
-} else {
-  module.exports = QuadTree;
-}
+module.exports = QuadTree;

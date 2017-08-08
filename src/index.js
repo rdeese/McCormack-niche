@@ -1,22 +1,28 @@
-const Canvas = require('canvas');
-const path = require('path');
-const fs = require('fs');
 const _ = require('lodash');
 const OpenSimplexNoise = require('open-simplex-noise').default;
 const { makeRectangle } = require('fractal-noise');
-const QuadTree = require('./js/lib/QuadTree');
+const QuadTree = require('./lib/QuadTree');
+let Canvas;
+let path;
+let fs;
+
+if (!process.env.WEBPACK) {
+  Canvas = require('canvas');
+  path = require('path');
+  fs = require('fs');
+}
 
 let VEL = 1;
 let GESTATION = 2;
 let NAG_SIZE = 1;
 let USE_NICHE = true;
 let NICHE_WIDTHS = [50, 100, 200];
-let NICHE_WIDTH;
+let NICHE_WIDTH = 100;
 let NICHE_AREA_SIZES = [40, 80, 160];
-let NICHE_AREA_SIZE;
+let NICHE_AREA_SIZE = 80;
 let NUM_NAGS = 10;
 let MUTATION_SEVERITIES = [0.1, 0.2];
-let MUTATION_SEVERITY;
+let MUTATION_SEVERITY = 0.1;
 let REPETITIONS = 2;
 let LOG_INTERVAL = 100;
 
@@ -32,7 +38,19 @@ const normalDistRand = function () {
   return (sample - 3) / 3
 }
 
-let main = function () {
+const getQueryParam = (variable) => {
+  var query = window.location.search.substring(1);
+  var vars = query.split('&');
+  for (var i = 0; i < vars.length; i++) {
+    var pair = vars[i].split('=');
+    if (decodeURIComponent(pair[0]) == variable) {
+      return decodeURIComponent(pair[1]);
+    }
+  }
+  console.log('Query variable %s not found', variable);
+}
+
+let node_main = function () {
   _.forEach(NICHE_WIDTHS, (width) => {
     _.forEach(NICHE_AREA_SIZES, (size) => {
       _.forEach(MUTATION_SEVERITIES, (severity) => {
@@ -53,6 +71,30 @@ let main = function () {
     });
   });
 };
+
+let browser_main = function () {
+  NICHE_WIDTH = getQueryParam("NICHE_WIDTH") || NICHE_WIDTH;
+  NICHE_AREA_SIZE = getQueryParam("NICHE_AREA_SIZE") || NICHE_AREA_SIZE;
+  NUM_NAGS = getQueryParam("NUM_NAGS") || NUM_NAGS;
+  MUTATION_SEVERITY  = getQueryParam("MUTATION_SEVERITY ") || MUTATION_SEVERITY;
+  USE_NICHE  = getQueryParam("USE_NICHE ") || USE_NICHE;
+  
+	canvas = document.querySelector("#world");
+  console.log(canvas);
+  canvas.width = document.documentElement.clientWidth-20;
+  canvas.height = document.documentElement.clientHeight-20;
+  let context = canvas.getContext("2d");
+  let w = new World(context);
+
+  let animate = () => {
+    w.step();
+    if (w.nagList.length > 0) {
+      requestAnimationFrame(animate);
+    }
+  };
+
+  animate();
+}
 
 let World = function (context) {
 	this.init(context);
@@ -306,4 +348,8 @@ Nag.prototype = {
 	}
 }
 
-main();
+if (process.env.WEBPACK) {
+  window.onload = browser_main;
+} else {
+  node_main();
+}
