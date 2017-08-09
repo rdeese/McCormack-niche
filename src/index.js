@@ -84,8 +84,20 @@ let browser_main = function () {
   NICHE_WIDTH = getQueryParam("NICHE_WIDTH") || NICHE_WIDTH;
   NICHE_AREA_SIZE = getQueryParam("NICHE_AREA_SIZE") || NICHE_AREA_SIZE;
   NUM_NAGS = getQueryParam("NUM_NAGS") || NUM_NAGS;
-  MUTATION_SEVERITY  = getQueryParam("MUTATION_SEVERITY ") || MUTATION_SEVERITY;
-  USE_NICHE  = getQueryParam("USE_NICHE ") || USE_NICHE;
+  MUTATION_SEVERITY = getQueryParam("MUTATION_SEVERITY") || MUTATION_SEVERITY;
+  useNiche = getQueryParam("USE_NICHE");
+  if (useNiche !== undefined) {
+    USE_NICHE = useNiche;
+  }
+  console.log("============ PARAMS ============");
+  console.log(
+`NICHE_WIDTH: ${NICHE_WIDTH}
+NICHE_AREA_SIZE: ${NICHE_AREA_SIZE}
+NUM_NAGS: ${NUM_NAGS}
+MUTATION_SEVERITY: ${MUTATION_SEVERITY}
+USE_NICHE: ${USE_NICHE}`
+  );
+  console.log("================================");
   
 	canvas = document.querySelector("#world");
   canvas.width = document.documentElement.clientWidth-20;
@@ -119,13 +131,10 @@ World.prototype = {
 		this.timestep = 0;
 
     let openSimplex = new OpenSimplexNoise(Date.now());
-    let noiseFunc = (x, y) => {
-      return openSimplex.noise2D(x, y);
-    }
     this.noiseMaps = []
 
     for (let i = 0; i <= 1; i += 0.2) {
-      this.noiseMaps.push(makeRectangle(this.width, this.height, noiseFunc.bind(this), { octaves: 2, persistence: i/2, frequency: 0.005 }));
+      this.noiseMaps.push(makeRectangle(this.width, this.height, openSimplex.noise2D.bind(openSimplex), { octaves: 2, persistence: i/2, frequency: 0.005 }));
     }
 
 		this.populateNagList();
@@ -275,8 +284,7 @@ Nag.prototype = {
       )
       return {
         death: this.m * (1-nicheFactor),
-        reproduction: this.f * nicheFactor,
-        nicheFactor: nicheFactor
+        reproduction: this.f * nicheFactor
       };
     } else {
       return {
