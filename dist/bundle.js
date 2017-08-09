@@ -88,10 +88,10 @@ let USE_NICHE = true;
 let NICHE_WIDTHS = [50, 100, 200];
 let NICHE_WIDTH = 100;
 let NICHE_AREA_SIZES = [40, 80, 160];
-let NICHE_AREA_SIZE = 80;
+let NICHE_AREA_SIZE = 120;
 let NUM_NAGS = 10;
 let MUTATION_SEVERITIES = [0.1, 0.2];
-let MUTATION_SEVERITY = 0.1;
+let MUTATION_SEVERITY = 0.3;
 let REPETITIONS = 2;
 let LOG_INTERVAL = 100;
 
@@ -119,25 +119,34 @@ const getQueryParam = (variable) => {
 }
 
 let node_main = function () {
-  _.forEach(NICHE_WIDTHS, (width) => {
-    _.forEach(NICHE_AREA_SIZES, (size) => {
-      _.forEach(MUTATION_SEVERITIES, (severity) => {
-        for (let i = 0; i < REPETITIONS; i++) {
-          fileId = ["niche-width", width, "niche-area", size, "mutation-size", severity, "run", i].join('_');
-          console.log(`\n\n================\nSTARTING ${fileId}\n================`);
-          NICHE_WIDTH = width;
-          NICHE_AREA_SIZE = size;
-          MUTATION_SEVERITY = severity;
-          canvas = new Canvas(1000, 1000);
-          let context = canvas.getContext("2d");
-          let w = new World(context);
-          w.run();
-          let filePath = path.resolve(process.cwd(), 'images', `output_${fileId}.png`);
-          fs.writeFileSync(filePath, canvas.toBuffer());
-        }
+  if (process.argv[2] == "--wallpaper") {
+    canvas = new Canvas(1920, 1080);
+    let context = canvas.getContext("2d");
+    let w = new World(context);
+    w.run();
+    let filePath = path.resolve(process.cwd(), `wallpaper.png`);
+    fs.writeFileSync(filePath, canvas.toBuffer());
+  } else {
+    _.forEach(NICHE_WIDTHS, (width) => {
+      _.forEach(NICHE_AREA_SIZES, (size) => {
+        _.forEach(MUTATION_SEVERITIES, (severity) => {
+          for (let i = 0; i < REPETITIONS; i++) {
+            fileId = ["niche-width", width, "niche-area", size, "mutation-size", severity, "run", i].join('_');
+            console.log(`\n\n================\nSTARTING ${fileId}\n================`);
+            NICHE_WIDTH = width;
+            NICHE_AREA_SIZE = size;
+            MUTATION_SEVERITY = severity;
+            canvas = new Canvas(1920, 1080);
+            let context = canvas.getContext("2d");
+            let w = new World(context);
+            w.run();
+            let filePath = path.resolve(process.cwd(), 'images', `output_${fileId}.png`);
+            fs.writeFileSync(filePath, canvas.toBuffer());
+          }
+        });
       });
     });
-  });
+  }
 };
 
 let browser_main = function () {
@@ -158,6 +167,7 @@ let browser_main = function () {
     if (w.nagList.length == 0) {
       setTimeout(1000);
       context.clearRect(0, 0, canvas.width, canvas.height);
+      console.log("========== RESTART ===========");
       w = new World(context);
     }
     requestAnimationFrame(animate);
