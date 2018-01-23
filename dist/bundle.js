@@ -132,7 +132,6 @@ let node_main = function () {
         _.forEach(MUTATION_SEVERITIES, (severity) => {
           for (let i = 0; i < REPETITIONS; i++) {
             fileId = ["niche-width", width, "niche-area", size, "mutation-size", severity, "run", i].join('_');
-            console.log(`\n\n================\nSTARTING ${fileId}\n================`);
             NICHE_WIDTH = width;
             NICHE_AREA_SIZE = size;
             MUTATION_SEVERITY = severity;
@@ -268,7 +267,9 @@ World.prototype = {
       let avgM = this.nagList.reduce((sum, nag) => { return sum += nag.m }, 0)/this.nagList.length;
       let avgR = this.nagList.reduce((sum, nag) => { return sum += nag.r }, 0)/this.nagList.length;
       let avgRo = this.nagList.reduce((sum, nag) => { return sum += nag.ro }, 0)/this.nagList.length;
-      console.log(`Population: ${population} Fertility: ${avgF.toFixed(2)} Mortality: ${avgM.toFixed(2)} Curvature ${avgRo.toFixed(2)} Irrationality: ${avgR.toFixed(2)} Niche preference: ${avgNiche.toFixed(2)}`)
+      if (true) {
+        console.log(`Population: ${population} Fertility: ${avgF.toFixed(2)} Mortality: ${avgM.toFixed(2)} Curvature ${avgRo.toFixed(2)} Irrationality: ${avgR.toFixed(2)} Niche preference: ${avgNiche.toFixed(2)}`)
+      }
     }
 
     this.timestep += 1;
