@@ -57,6 +57,17 @@ let node_main = function () {
     w.run();
     let filePath = path.resolve(process.cwd(), `wallpaper.png`);
     fs.writeFileSync(filePath, canvas.toBuffer());
+  } else if (process.argv[2] == "--render") {
+    const numRenders = parseInt(process.argv[3]) || 1;
+    for (let i = 0; i < numRenders; i++) {
+      canvas = new Canvas(2000, 1000);
+      let context = canvas.getContext("2d");
+      let w = new World(context);
+      w.run();
+      const timestamp = (new Date()).toISOString().replace(/(-|T|:|Z|\.\d+)/g, '')
+      let filePath = path.resolve(process.cwd(), `images/niche-${timestamp}.png`);
+      fs.writeFileSync(filePath, canvas.toBuffer());
+    }
   } else {
     _.forEach(NICHE_WIDTHS, (width) => {
       _.forEach(NICHE_AREA_SIZES, (size) => {
