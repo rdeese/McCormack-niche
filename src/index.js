@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const OpenSimplexNoise = require('open-simplex-noise').default;
+import { makeNoise2D } from "open-simplex-noise";
 const { makeRectangle } = require('fractal-noise');
 const QuadTree = require('./lib/QuadTree');
 let Canvas;
@@ -39,10 +39,10 @@ const normalDistRand = function () {
 }
 
 const getQueryParam = (variable) => {
-  var query = window.location.search.substring(1);
-  var vars = query.split('&');
-  for (var i = 0; i < vars.length; i++) {
-    var pair = vars[i].split('=');
+  const query = window.location.search.substring(1);
+  const vars = query.split('&');
+  for (let i = 0; i < vars.length; i++) {
+    const pair = vars[i].split('=');
     if (decodeURIComponent(pair[0]) == variable) {
       return decodeURIComponent(pair[1]);
     }
@@ -95,7 +95,7 @@ let browser_main = function () {
   NICHE_AREA_SIZE = getQueryParam("NICHE_AREA_SIZE") || NICHE_AREA_SIZE;
   NUM_NAGS = getQueryParam("NUM_NAGS") || NUM_NAGS;
   MUTATION_SEVERITY = getQueryParam("MUTATION_SEVERITY") || MUTATION_SEVERITY;
-  useNiche = getQueryParam("USE_NICHE");
+  const useNiche = getQueryParam("USE_NICHE");
   if (useNiche !== undefined) {
     USE_NICHE = useNiche;
   }
@@ -140,13 +140,13 @@ World.prototype = {
 		this.height = context.canvas.height;
 		this.timestep = 0;
 
-    let openSimplex = new OpenSimplexNoise(Date.now());
+    let openSimplex = makeNoise2D(Date.now());
     this.noiseMaps = []
-
     for (let i = 0; i <= 1; i += 0.2) {
-      this.noiseMaps.push(makeRectangle(this.width, this.height, openSimplex.noise2D.bind(openSimplex), { octaves: 2, persistence: i/2, frequency: 0.005 }));
+      this.noiseMaps.push(makeRectangle(this.width, this.height, openSimplex, { octaves: 2, persistence: i/2, frequency: 0.005 }));
     }
 
+    console.log(this.noiseMaps)
 		this.populateNagList();
     this.quadTree = new QuadTree({ x: 0, y: 0, width: this.width, height: this.height }, true, 7);
 	},
@@ -329,21 +329,21 @@ Nag.prototype = {
   // returns the ratio of 'inked' area to total area around the nag. "area around
   // the nag" is a square with side length given by the global constant NICHE_AREA_SIZE
   localDensity: function (data) {
-    xStart = Math.floor(this.x-NICHE_AREA_SIZE/2);
-    xEnd = Math.ceil(this.x+NICHE_AREA_SIZE/2);
-    yStart = Math.floor(this.y-NICHE_AREA_SIZE/2);
-    yEnd = Math.ceil(this.y+NICHE_AREA_SIZE/2);
-    var totalArea = 0;
-    var inkedPixelCount = 0;
-    for (var x = xStart; x < xEnd; x++) {
-      for (var y = yStart; y < yEnd; y++) {
+    const xStart = Math.floor(this.x-NICHE_AREA_SIZE/2);
+    const xEnd = Math.ceil(this.x+NICHE_AREA_SIZE/2);
+    const yStart = Math.floor(this.y-NICHE_AREA_SIZE/2);
+    const yEnd = Math.ceil(this.y+NICHE_AREA_SIZE/2);
+    let totalArea = 0;
+    let inkedPixelCount = 0;
+    for (let x = xStart; x < xEnd; x++) {
+      for (let y = yStart; y < yEnd; y++) {
         if (data[4*canvas.width*y+4*x+3] > 0) {
           inkedPixelCount += 1;
         }
         totalArea++;
       }
     }
-    var density = inkedPixelCount / totalArea;
+    const density = inkedPixelCount / totalArea;
     return density;
   },
 

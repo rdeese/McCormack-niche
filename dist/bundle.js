@@ -65,10 +65,14 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(process) {const _ = __webpack_require__(2);
-const OpenSimplexNoise = __webpack_require__(5).default;
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_open_simplex_noise__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_open_simplex_noise___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_open_simplex_noise__);
+const _ = __webpack_require__(2);
+
 const { makeRectangle } = __webpack_require__(7);
 const QuadTree = __webpack_require__(8);
 let Canvas;
@@ -108,10 +112,10 @@ const normalDistRand = function () {
 }
 
 const getQueryParam = (variable) => {
-  var query = window.location.search.substring(1);
-  var vars = query.split('&');
-  for (var i = 0; i < vars.length; i++) {
-    var pair = vars[i].split('=');
+  const query = window.location.search.substring(1);
+  const vars = query.split('&');
+  for (let i = 0; i < vars.length; i++) {
+    const pair = vars[i].split('=');
     if (decodeURIComponent(pair[0]) == variable) {
       return decodeURIComponent(pair[1]);
     }
@@ -126,6 +130,17 @@ let node_main = function () {
     w.run();
     let filePath = path.resolve(process.cwd(), `wallpaper.png`);
     fs.writeFileSync(filePath, canvas.toBuffer());
+  } else if (process.argv[2] == "--render") {
+    const numRenders = parseInt(process.argv[3]) || 1;
+    for (let i = 0; i < numRenders; i++) {
+      canvas = new Canvas(2000, 1000);
+      let context = canvas.getContext("2d");
+      let w = new World(context);
+      w.run();
+      const timestamp = (new Date()).toISOString().replace(/(-|T|:|Z|\.\d+)/g, '')
+      let filePath = path.resolve(process.cwd(), `images/niche-${timestamp}.png`);
+      fs.writeFileSync(filePath, canvas.toBuffer());
+    }
   } else {
     _.forEach(NICHE_WIDTHS, (width) => {
       _.forEach(NICHE_AREA_SIZES, (size) => {
@@ -153,7 +168,7 @@ let browser_main = function () {
   NICHE_AREA_SIZE = getQueryParam("NICHE_AREA_SIZE") || NICHE_AREA_SIZE;
   NUM_NAGS = getQueryParam("NUM_NAGS") || NUM_NAGS;
   MUTATION_SEVERITY = getQueryParam("MUTATION_SEVERITY") || MUTATION_SEVERITY;
-  useNiche = getQueryParam("USE_NICHE");
+  const useNiche = getQueryParam("USE_NICHE");
   if (useNiche !== undefined) {
     USE_NICHE = useNiche;
   }
@@ -198,13 +213,13 @@ World.prototype = {
 		this.height = context.canvas.height;
 		this.timestep = 0;
 
-    let openSimplex = new OpenSimplexNoise(Date.now());
+    let openSimplex = Object(__WEBPACK_IMPORTED_MODULE_0_open_simplex_noise__["makeNoise2D"])(Date.now());
     this.noiseMaps = []
-
     for (let i = 0; i <= 1; i += 0.2) {
-      this.noiseMaps.push(makeRectangle(this.width, this.height, openSimplex.noise2D.bind(openSimplex), { octaves: 2, persistence: i/2, frequency: 0.005 }));
+      this.noiseMaps.push(makeRectangle(this.width, this.height, openSimplex, { octaves: 2, persistence: i/2, frequency: 0.005 }));
     }
 
+    console.log(this.noiseMaps)
 		this.populateNagList();
     this.quadTree = new QuadTree({ x: 0, y: 0, width: this.width, height: this.height }, true, 7);
 	},
@@ -387,21 +402,21 @@ Nag.prototype = {
   // returns the ratio of 'inked' area to total area around the nag. "area around
   // the nag" is a square with side length given by the global constant NICHE_AREA_SIZE
   localDensity: function (data) {
-    xStart = Math.floor(this.x-NICHE_AREA_SIZE/2);
-    xEnd = Math.ceil(this.x+NICHE_AREA_SIZE/2);
-    yStart = Math.floor(this.y-NICHE_AREA_SIZE/2);
-    yEnd = Math.ceil(this.y+NICHE_AREA_SIZE/2);
-    var totalArea = 0;
-    var inkedPixelCount = 0;
-    for (var x = xStart; x < xEnd; x++) {
-      for (var y = yStart; y < yEnd; y++) {
+    const xStart = Math.floor(this.x-NICHE_AREA_SIZE/2);
+    const xEnd = Math.ceil(this.x+NICHE_AREA_SIZE/2);
+    const yStart = Math.floor(this.y-NICHE_AREA_SIZE/2);
+    const yEnd = Math.ceil(this.y+NICHE_AREA_SIZE/2);
+    let totalArea = 0;
+    let inkedPixelCount = 0;
+    for (let x = xStart; x < xEnd; x++) {
+      for (let y = yStart; y < yEnd; y++) {
         if (data[4*canvas.width*y+4*x+3] > 0) {
           inkedPixelCount += 1;
         }
         totalArea++;
       }
     }
-    var density = inkedPixelCount / totalArea;
+    const density = inkedPixelCount / totalArea;
     return density;
   },
 
@@ -442,7 +457,7 @@ if (true) {
   node_main();
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1)))
 
 /***/ }),
 /* 1 */
@@ -641,7 +656,7 @@ process.umask = function() { return 0; };
 /* WEBPACK VAR INJECTION */(function(global, module) {var __WEBPACK_AMD_DEFINE_RESULT__;/**
  * @license
  * Lodash <https://lodash.com/>
- * Copyright JS Foundation and other contributors <https://js.foundation/>
+ * Copyright OpenJS Foundation and other contributors <https://openjsf.org/>
  * Released under MIT license <https://lodash.com/license>
  * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
  * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -652,7 +667,7 @@ process.umask = function() { return 0; };
   var undefined;
 
   /** Used as the semantic version number. */
-  var VERSION = '4.17.4';
+  var VERSION = '4.17.20';
 
   /** Used as the size to enable large array optimizations. */
   var LARGE_ARRAY_SIZE = 200;
@@ -783,7 +798,6 @@ process.umask = function() { return 0; };
   /** Used to match property names within property paths. */
   var reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/,
       reIsPlainProp = /^\w*$/,
-      reLeadingDot = /^\./,
       rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|$))/g;
 
   /**
@@ -883,8 +897,8 @@ process.umask = function() { return 0; };
       reOptMod = rsModifier + '?',
       rsOptVar = '[' + rsVarRange + ']?',
       rsOptJoin = '(?:' + rsZWJ + '(?:' + [rsNonAstral, rsRegional, rsSurrPair].join('|') + ')' + rsOptVar + reOptMod + ')*',
-      rsOrdLower = '\\d*(?:(?:1st|2nd|3rd|(?![123])\\dth)\\b)',
-      rsOrdUpper = '\\d*(?:(?:1ST|2ND|3RD|(?![123])\\dTH)\\b)',
+      rsOrdLower = '\\d*(?:1st|2nd|3rd|(?![123])\\dth)(?=\\b|[A-Z_])',
+      rsOrdUpper = '\\d*(?:1ST|2ND|3RD|(?![123])\\dTH)(?=\\b|[a-z_])',
       rsSeq = rsOptVar + reOptMod + rsOptJoin,
       rsEmoji = '(?:' + [rsDingbat, rsRegional, rsSurrPair].join('|') + ')' + rsSeq,
       rsSymbol = '(?:' + [rsNonAstral + rsCombo + '?', rsCombo, rsRegional, rsSurrPair, rsAstral].join('|') + ')';
@@ -917,7 +931,7 @@ process.umask = function() { return 0; };
   var reHasUnicode = RegExp('[' + rsZWJ + rsAstralRange  + rsComboRange + rsVarRange + ']');
 
   /** Used to detect strings that need a more robust regexp to match words. */
-  var reHasUnicodeWord = /[a-z][A-Z]|[A-Z]{2,}[a-z]|[0-9][a-zA-Z]|[a-zA-Z][0-9]|[^a-zA-Z0-9 ]/;
+  var reHasUnicodeWord = /[a-z][A-Z]|[A-Z]{2}[a-z]|[0-9][a-zA-Z]|[a-zA-Z][0-9]|[^a-zA-Z0-9 ]/;
 
   /** Used to assign default `context` object properties. */
   var contextProps = [
@@ -1077,6 +1091,14 @@ process.umask = function() { return 0; };
   /** Used to access faster Node.js helpers. */
   var nodeUtil = (function() {
     try {
+      // Use `util.types` for Node.js 10+.
+      var types = freeModule && freeModule.require && freeModule.require('util').types;
+
+      if (types) {
+        return types;
+      }
+
+      // Legacy `process.binding('util')` for Node.js < 10.
       return freeProcess && freeProcess.binding && freeProcess.binding('util');
     } catch (e) {}
   }());
@@ -1090,34 +1112,6 @@ process.umask = function() { return 0; };
       nodeIsTypedArray = nodeUtil && nodeUtil.isTypedArray;
 
   /*--------------------------------------------------------------------------*/
-
-  /**
-   * Adds the key-value `pair` to `map`.
-   *
-   * @private
-   * @param {Object} map The map to modify.
-   * @param {Array} pair The key-value pair to add.
-   * @returns {Object} Returns `map`.
-   */
-  function addMapEntry(map, pair) {
-    // Don't return `map.set` because it's not chainable in IE 11.
-    map.set(pair[0], pair[1]);
-    return map;
-  }
-
-  /**
-   * Adds `value` to `set`.
-   *
-   * @private
-   * @param {Object} set The set to modify.
-   * @param {*} value The value to add.
-   * @returns {Object} Returns `set`.
-   */
-  function addSetEntry(set, value) {
-    // Don't return `set.add` because it's not chainable in IE 11.
-    set.add(value);
-    return set;
-  }
 
   /**
    * A faster alternative to `Function#apply`, this function invokes `func`
@@ -3317,7 +3311,7 @@ process.umask = function() { return 0; };
           if (!cloneableTags[tag]) {
             return object ? value : {};
           }
-          result = initCloneByTag(value, tag, baseClone, isDeep);
+          result = initCloneByTag(value, tag, isDeep);
         }
       }
       // Check for circular references and return its corresponding clone.
@@ -3327,6 +3321,16 @@ process.umask = function() { return 0; };
         return stacked;
       }
       stack.set(value, result);
+
+      if (isSet(value)) {
+        value.forEach(function(subValue) {
+          result.add(baseClone(subValue, bitmask, customizer, subValue, value, stack));
+        });
+      } else if (isMap(value)) {
+        value.forEach(function(subValue, key) {
+          result.set(key, baseClone(subValue, bitmask, customizer, key, value, stack));
+        });
+      }
 
       var keysFunc = isFull
         ? (isFlat ? getAllKeysIn : getAllKeys)
@@ -4249,13 +4253,13 @@ process.umask = function() { return 0; };
         return;
       }
       baseFor(source, function(srcValue, key) {
+        stack || (stack = new Stack);
         if (isObject(srcValue)) {
-          stack || (stack = new Stack);
           baseMergeDeep(object, source, key, srcIndex, baseMerge, customizer, stack);
         }
         else {
           var newValue = customizer
-            ? customizer(object[key], srcValue, (key + ''), object, source, stack)
+            ? customizer(safeGet(object, key), srcValue, (key + ''), object, source, stack)
             : undefined;
 
           if (newValue === undefined) {
@@ -4282,8 +4286,8 @@ process.umask = function() { return 0; };
      *  counterparts.
      */
     function baseMergeDeep(object, source, key, srcIndex, mergeFunc, customizer, stack) {
-      var objValue = object[key],
-          srcValue = source[key],
+      var objValue = safeGet(object, key),
+          srcValue = safeGet(source, key),
           stacked = stack.get(srcValue);
 
       if (stacked) {
@@ -4326,7 +4330,7 @@ process.umask = function() { return 0; };
           if (isArguments(objValue)) {
             newValue = toPlainObject(objValue);
           }
-          else if (!isObject(objValue) || (srcIndex && isFunction(objValue))) {
+          else if (!isObject(objValue) || isFunction(objValue)) {
             newValue = initCloneObject(srcValue);
           }
         }
@@ -4370,8 +4374,21 @@ process.umask = function() { return 0; };
      * @returns {Array} Returns the new sorted array.
      */
     function baseOrderBy(collection, iteratees, orders) {
+      if (iteratees.length) {
+        iteratees = arrayMap(iteratees, function(iteratee) {
+          if (isArray(iteratee)) {
+            return function(value) {
+              return baseGet(value, iteratee.length === 1 ? iteratee[0] : iteratee);
+            }
+          }
+          return iteratee;
+        });
+      } else {
+        iteratees = [identity];
+      }
+
       var index = -1;
-      iteratees = arrayMap(iteratees.length ? iteratees : [identity], baseUnary(getIteratee()));
+      iteratees = arrayMap(iteratees, baseUnary(getIteratee()));
 
       var result = baseMap(collection, function(value, key, collection) {
         var criteria = arrayMap(iteratees, function(iteratee) {
@@ -4628,6 +4645,10 @@ process.umask = function() { return 0; };
         var key = toKey(path[index]),
             newValue = value;
 
+        if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+          return object;
+        }
+
         if (index != lastIndex) {
           var objValue = nested[key];
           newValue = customizer ? customizer(objValue, key, nested) : undefined;
@@ -4780,11 +4801,14 @@ process.umask = function() { return 0; };
      *  into `array`.
      */
     function baseSortedIndexBy(array, value, iteratee, retHighest) {
-      value = iteratee(value);
-
       var low = 0,
-          high = array == null ? 0 : array.length,
-          valIsNaN = value !== value,
+          high = array == null ? 0 : array.length;
+      if (high === 0) {
+        return 0;
+      }
+
+      value = iteratee(value);
+      var valIsNaN = value !== value,
           valIsNull = value === null,
           valIsSymbol = isSymbol(value),
           valIsUndefined = value === undefined;
@@ -5192,20 +5216,6 @@ process.umask = function() { return 0; };
     }
 
     /**
-     * Creates a clone of `map`.
-     *
-     * @private
-     * @param {Object} map The map to clone.
-     * @param {Function} cloneFunc The function to clone values.
-     * @param {boolean} [isDeep] Specify a deep clone.
-     * @returns {Object} Returns the cloned map.
-     */
-    function cloneMap(map, isDeep, cloneFunc) {
-      var array = isDeep ? cloneFunc(mapToArray(map), CLONE_DEEP_FLAG) : mapToArray(map);
-      return arrayReduce(array, addMapEntry, new map.constructor);
-    }
-
-    /**
      * Creates a clone of `regexp`.
      *
      * @private
@@ -5216,20 +5226,6 @@ process.umask = function() { return 0; };
       var result = new regexp.constructor(regexp.source, reFlags.exec(regexp));
       result.lastIndex = regexp.lastIndex;
       return result;
-    }
-
-    /**
-     * Creates a clone of `set`.
-     *
-     * @private
-     * @param {Object} set The set to clone.
-     * @param {Function} cloneFunc The function to clone values.
-     * @param {boolean} [isDeep] Specify a deep clone.
-     * @returns {Object} Returns the cloned set.
-     */
-    function cloneSet(set, isDeep, cloneFunc) {
-      var array = isDeep ? cloneFunc(setToArray(set), CLONE_DEEP_FLAG) : setToArray(set);
-      return arrayReduce(array, addSetEntry, new set.constructor);
     }
 
     /**
@@ -6095,7 +6091,7 @@ process.umask = function() { return 0; };
       return function(number, precision) {
         number = toNumber(number);
         precision = precision == null ? 0 : nativeMin(toInteger(precision), 292);
-        if (precision) {
+        if (precision && nativeIsFinite(number)) {
           // Shift with exponential notation to avoid floating-point issues.
           // See [MDN](https://mdn.io/round#Examples) for more details.
           var pair = (toString(number) + 'e').split('e'),
@@ -6297,10 +6293,11 @@ process.umask = function() { return 0; };
       if (arrLength != othLength && !(isPartial && othLength > arrLength)) {
         return false;
       }
-      // Assume cyclic values are equal.
-      var stacked = stack.get(array);
-      if (stacked && stack.get(other)) {
-        return stacked == other;
+      // Check that cyclic values are equal.
+      var arrStacked = stack.get(array);
+      var othStacked = stack.get(other);
+      if (arrStacked && othStacked) {
+        return arrStacked == other && othStacked == array;
       }
       var index = -1,
           result = true,
@@ -6462,10 +6459,11 @@ process.umask = function() { return 0; };
           return false;
         }
       }
-      // Assume cyclic values are equal.
-      var stacked = stack.get(object);
-      if (stacked && stack.get(other)) {
-        return stacked == other;
+      // Check that cyclic values are equal.
+      var objStacked = stack.get(object);
+      var othStacked = stack.get(other);
+      if (objStacked && othStacked) {
+        return objStacked == other && othStacked == object;
       }
       var result = true;
       stack.set(object, other);
@@ -6826,7 +6824,7 @@ process.umask = function() { return 0; };
      */
     function initCloneArray(array) {
       var length = array.length,
-          result = array.constructor(length);
+          result = new array.constructor(length);
 
       // Add properties assigned by `RegExp#exec`.
       if (length && typeof array[0] == 'string' && hasOwnProperty.call(array, 'index')) {
@@ -6853,16 +6851,15 @@ process.umask = function() { return 0; };
      * Initializes an object clone based on its `toStringTag`.
      *
      * **Note:** This function only supports cloning values with tags of
-     * `Boolean`, `Date`, `Error`, `Number`, `RegExp`, or `String`.
+     * `Boolean`, `Date`, `Error`, `Map`, `Number`, `RegExp`, `Set`, or `String`.
      *
      * @private
      * @param {Object} object The object to clone.
      * @param {string} tag The `toStringTag` of the object to clone.
-     * @param {Function} cloneFunc The function to clone values.
      * @param {boolean} [isDeep] Specify a deep clone.
      * @returns {Object} Returns the initialized clone.
      */
-    function initCloneByTag(object, tag, cloneFunc, isDeep) {
+    function initCloneByTag(object, tag, isDeep) {
       var Ctor = object.constructor;
       switch (tag) {
         case arrayBufferTag:
@@ -6881,7 +6878,7 @@ process.umask = function() { return 0; };
           return cloneTypedArray(object, isDeep);
 
         case mapTag:
-          return cloneMap(object, isDeep, cloneFunc);
+          return new Ctor;
 
         case numberTag:
         case stringTag:
@@ -6891,7 +6888,7 @@ process.umask = function() { return 0; };
           return cloneRegExp(object);
 
         case setTag:
-          return cloneSet(object, isDeep, cloneFunc);
+          return new Ctor;
 
         case symbolTag:
           return cloneSymbol(object);
@@ -6938,10 +6935,13 @@ process.umask = function() { return 0; };
      * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
      */
     function isIndex(value, length) {
+      var type = typeof value;
       length = length == null ? MAX_SAFE_INTEGER : length;
+
       return !!length &&
-        (typeof value == 'number' || reIsUint.test(value)) &&
-        (value > -1 && value % 1 == 0 && value < length);
+        (type == 'number' ||
+          (type != 'symbol' && reIsUint.test(value))) &&
+            (value > -1 && value % 1 == 0 && value < length);
     }
 
     /**
@@ -7276,6 +7276,26 @@ process.umask = function() { return 0; };
     }
 
     /**
+     * Gets the value at `key`, unless `key` is "__proto__" or "constructor".
+     *
+     * @private
+     * @param {Object} object The object to query.
+     * @param {string} key The key of the property to get.
+     * @returns {*} Returns the property value.
+     */
+    function safeGet(object, key) {
+      if (key === 'constructor' && typeof object[key] === 'function') {
+        return;
+      }
+
+      if (key == '__proto__') {
+        return;
+      }
+
+      return object[key];
+    }
+
+    /**
      * Sets metadata for `func`.
      *
      * **Note:** If this function becomes hot, i.e. is invoked a lot in a short
@@ -7391,11 +7411,11 @@ process.umask = function() { return 0; };
      */
     var stringToPath = memoizeCapped(function(string) {
       var result = [];
-      if (reLeadingDot.test(string)) {
+      if (string.charCodeAt(0) === 46 /* . */) {
         result.push('');
       }
-      string.replace(rePropName, function(match, number, quote, string) {
-        result.push(quote ? string.replace(reEscapeChar, '$1') : (number || match));
+      string.replace(rePropName, function(match, number, quote, subString) {
+        result.push(quote ? subString.replace(reEscapeChar, '$1') : (number || match));
       });
       return result;
     });
@@ -9824,6 +9844,10 @@ process.umask = function() { return 0; };
      * // The `_.property` iteratee shorthand.
      * _.filter(users, 'active');
      * // => objects for ['barney']
+     *
+     * // Combining several predicates using `_.overEvery` or `_.overSome`.
+     * _.filter(users, _.overSome([{ 'age': 36 }, ['age', 40]]));
+     * // => objects for ['fred', 'barney']
      */
     function filter(collection, predicate) {
       var func = isArray(collection) ? arrayFilter : baseFilter;
@@ -10573,15 +10597,15 @@ process.umask = function() { return 0; };
      * var users = [
      *   { 'user': 'fred',   'age': 48 },
      *   { 'user': 'barney', 'age': 36 },
-     *   { 'user': 'fred',   'age': 40 },
+     *   { 'user': 'fred',   'age': 30 },
      *   { 'user': 'barney', 'age': 34 }
      * ];
      *
      * _.sortBy(users, [function(o) { return o.user; }]);
-     * // => objects for [['barney', 36], ['barney', 34], ['fred', 48], ['fred', 40]]
+     * // => objects for [['barney', 36], ['barney', 34], ['fred', 48], ['fred', 30]]
      *
      * _.sortBy(users, ['user', 'age']);
-     * // => objects for [['barney', 34], ['barney', 36], ['fred', 40], ['fred', 48]]
+     * // => objects for [['barney', 34], ['barney', 36], ['fred', 30], ['fred', 48]]
      */
     var sortBy = baseRest(function(collection, iteratees) {
       if (collection == null) {
@@ -11003,9 +11027,11 @@ process.umask = function() { return 0; };
       function remainingWait(time) {
         var timeSinceLastCall = time - lastCallTime,
             timeSinceLastInvoke = time - lastInvokeTime,
-            result = wait - timeSinceLastCall;
+            timeWaiting = wait - timeSinceLastCall;
 
-        return maxing ? nativeMin(result, maxWait - timeSinceLastInvoke) : result;
+        return maxing
+          ? nativeMin(timeWaiting, maxWait - timeSinceLastInvoke)
+          : timeWaiting;
       }
 
       function shouldInvoke(time) {
@@ -11066,6 +11092,7 @@ process.umask = function() { return 0; };
           }
           if (maxing) {
             // Handle invocations in a tight loop.
+            clearTimeout(timerId);
             timerId = setTimeout(timerExpired, wait);
             return invokeFunc(lastCallTime);
           }
@@ -13437,9 +13464,35 @@ process.umask = function() { return 0; };
      * _.defaults({ 'a': 1 }, { 'b': 2 }, { 'a': 3 });
      * // => { 'a': 1, 'b': 2 }
      */
-    var defaults = baseRest(function(args) {
-      args.push(undefined, customDefaultsAssignIn);
-      return apply(assignInWith, undefined, args);
+    var defaults = baseRest(function(object, sources) {
+      object = Object(object);
+
+      var index = -1;
+      var length = sources.length;
+      var guard = length > 2 ? sources[2] : undefined;
+
+      if (guard && isIterateeCall(sources[0], sources[1], guard)) {
+        length = 1;
+      }
+
+      while (++index < length) {
+        var source = sources[index];
+        var props = keysIn(source);
+        var propsIndex = -1;
+        var propsLength = props.length;
+
+        while (++propsIndex < propsLength) {
+          var key = props[propsIndex];
+          var value = object[key];
+
+          if (value === undefined ||
+              (eq(value, objectProto[key]) && !hasOwnProperty.call(object, key))) {
+            object[key] = source[key];
+          }
+        }
+      }
+
+      return object;
     });
 
     /**
@@ -13836,6 +13889,11 @@ process.umask = function() { return 0; };
      * // => { '1': 'c', '2': 'b' }
      */
     var invert = createInverter(function(result, value, key) {
+      if (value != null &&
+          typeof value.toString != 'function') {
+        value = nativeObjectToString.call(value);
+      }
+
       result[value] = key;
     }, constant(identity));
 
@@ -13866,6 +13924,11 @@ process.umask = function() { return 0; };
      * // => { 'group1': ['a', 'c'], 'group2': ['b'] }
      */
     var invertBy = createInverter(function(result, value, key) {
+      if (value != null &&
+          typeof value.toString != 'function') {
+        value = nativeObjectToString.call(value);
+      }
+
       if (hasOwnProperty.call(result, value)) {
         result[value].push(key);
       } else {
@@ -15416,9 +15479,12 @@ process.umask = function() { return 0; };
       , 'g');
 
       // Use a sourceURL for easier debugging.
+      // The sourceURL gets injected into the source that's eval-ed, so be careful
+      // to normalize all kinds of whitespace, so e.g. newlines (and unicode versions of it) can't sneak in
+      // and escape the comment, thus injecting code that gets evaled.
       var sourceURL = '//# sourceURL=' +
-        ('sourceURL' in options
-          ? options.sourceURL
+        (hasOwnProperty.call(options, 'sourceURL')
+          ? (options.sourceURL + '').replace(/\s/g, ' ')
           : ('lodash.templateSources[' + (++templateCounter) + ']')
         ) + '\n';
 
@@ -15451,7 +15517,7 @@ process.umask = function() { return 0; };
 
       // If `variable` is not specified wrap a with-statement around the generated
       // code to add the data object to the top of the scope chain.
-      var variable = options.variable;
+      var variable = hasOwnProperty.call(options, 'variable') && options.variable;
       if (!variable) {
         source = 'with (obj) {\n' + source + '\n}\n';
       }
@@ -16157,6 +16223,9 @@ process.umask = function() { return 0; };
      * values against any array or object value, respectively. See `_.isEqual`
      * for a list of supported value comparisons.
      *
+     * **Note:** Multiple values can be checked by combining several matchers
+     * using `_.overSome`
+     *
      * @static
      * @memberOf _
      * @since 3.0.0
@@ -16172,6 +16241,10 @@ process.umask = function() { return 0; };
      *
      * _.filter(objects, _.matches({ 'a': 4, 'c': 6 }));
      * // => [{ 'a': 4, 'b': 5, 'c': 6 }]
+     *
+     * // Checking for several possible values
+     * _.filter(objects, _.overSome([_.matches({ 'a': 1 }), _.matches({ 'a': 4 })]));
+     * // => [{ 'a': 1, 'b': 2, 'c': 3 }, { 'a': 4, 'b': 5, 'c': 6 }]
      */
     function matches(source) {
       return baseMatches(baseClone(source, CLONE_DEEP_FLAG));
@@ -16185,6 +16258,9 @@ process.umask = function() { return 0; };
      * **Note:** Partial comparisons will match empty array and empty object
      * `srcValue` values against any array or object value, respectively. See
      * `_.isEqual` for a list of supported value comparisons.
+     *
+     * **Note:** Multiple values can be checked by combining several matchers
+     * using `_.overSome`
      *
      * @static
      * @memberOf _
@@ -16202,6 +16278,10 @@ process.umask = function() { return 0; };
      *
      * _.find(objects, _.matchesProperty('a', 4));
      * // => { 'a': 4, 'b': 5, 'c': 6 }
+     *
+     * // Checking for several possible values
+     * _.filter(objects, _.overSome([_.matchesProperty('a', 1), _.matchesProperty('a', 4)]));
+     * // => [{ 'a': 1, 'b': 2, 'c': 3 }, { 'a': 4, 'b': 5, 'c': 6 }]
      */
     function matchesProperty(path, srcValue) {
       return baseMatchesProperty(path, baseClone(srcValue, CLONE_DEEP_FLAG));
@@ -16425,6 +16505,10 @@ process.umask = function() { return 0; };
      * Creates a function that checks if **all** of the `predicates` return
      * truthy when invoked with the arguments it receives.
      *
+     * Following shorthands are possible for providing predicates.
+     * Pass an `Object` and it will be used as an parameter for `_.matches` to create the predicate.
+     * Pass an `Array` of parameters for `_.matchesProperty` and the predicate will be created using them.
+     *
      * @static
      * @memberOf _
      * @since 4.0.0
@@ -16451,6 +16535,10 @@ process.umask = function() { return 0; };
      * Creates a function that checks if **any** of the `predicates` return
      * truthy when invoked with the arguments it receives.
      *
+     * Following shorthands are possible for providing predicates.
+     * Pass an `Object` and it will be used as an parameter for `_.matches` to create the predicate.
+     * Pass an `Array` of parameters for `_.matchesProperty` and the predicate will be created using them.
+     *
      * @static
      * @memberOf _
      * @since 4.0.0
@@ -16470,6 +16558,9 @@ process.umask = function() { return 0; };
      *
      * func(NaN);
      * // => false
+     *
+     * var matchesFunc = _.overSome([{ 'a': 1 }, { 'a': 2 }])
+     * var matchesPropertyFunc = _.overSome([['a', 1], ['a', 2]])
      */
     var overSome = createOver(arraySome);
 
@@ -17656,10 +17747,11 @@ process.umask = function() { return 0; };
     baseForOwn(LazyWrapper.prototype, function(func, methodName) {
       var lodashFunc = lodash[methodName];
       if (lodashFunc) {
-        var key = (lodashFunc.name + ''),
-            names = realNames[key] || (realNames[key] = []);
-
-        names.push({ 'name': methodName, 'func': lodashFunc });
+        var key = lodashFunc.name + '';
+        if (!hasOwnProperty.call(realNames, key)) {
+          realNames[key] = [];
+        }
+        realNames[key].push({ 'name': methodName, 'func': lodashFunc });
       }
     });
 
@@ -17706,9 +17798,9 @@ process.umask = function() { return 0; };
 
     // Define as an anonymous module so, through path mapping, it can be
     // referenced as the "underscore" module.
-    !(__WEBPACK_AMD_DEFINE_RESULT__ = function() {
+    !(__WEBPACK_AMD_DEFINE_RESULT__ = (function() {
       return _;
-    }.call(exports, __webpack_require__, exports, module),
+    }).call(exports, __webpack_require__, exports, module),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
   }
   // Check for `exports` after `define` in case a build optimizer adds it.
@@ -17789,240 +17881,296 @@ module.exports = function(module) {
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var constants_1 = __webpack_require__(6);
-var Contribution2 = (function () {
-    function Contribution2(multiplier, xsb, ysb) {
-        this.dx = -xsb - multiplier * constants_1.SQUISH_2D;
-        this.dy = -ysb - multiplier * constants_1.SQUISH_2D;
-        this.xsb = xsb;
-        this.ysb = ysb;
-    }
-    return Contribution2;
-}());
-var Contribution3 = (function () {
-    function Contribution3(multiplier, xsb, ysb, zsb) {
-        this.dx = -xsb - multiplier * constants_1.SQUISH_3D;
-        this.dy = -ysb - multiplier * constants_1.SQUISH_3D;
-        this.dz = -zsb - multiplier * constants_1.SQUISH_3D;
-        this.xsb = xsb;
-        this.ysb = ysb;
-        this.zsb = zsb;
-    }
-    return Contribution3;
-}());
-var Contribution4 = (function () {
-    function Contribution4(multiplier, xsb, ysb, zsb, wsb) {
-        this.dx = -xsb - multiplier * constants_1.SQUISH_4D;
-        this.dy = -ysb - multiplier * constants_1.SQUISH_4D;
-        this.dz = -zsb - multiplier * constants_1.SQUISH_4D;
-        this.dw = -wsb - multiplier * constants_1.SQUISH_4D;
-        this.xsb = xsb;
-        this.ysb = ysb;
-        this.zsb = zsb;
-        this.wsb = wsb;
-    }
-    return Contribution4;
-}());
-function shuffleSeed(seed) {
-    var newSeed = new Uint32Array(1);
-    newSeed[0] = seed[0] * 1664525 + 1013904223;
-    return newSeed;
+function contribution2D(multiplier, xsb, ysb) {
+    return {
+        dx: -xsb - multiplier * constants_1.SQUISH_2D,
+        dy: -ysb - multiplier * constants_1.SQUISH_2D,
+        xsb: xsb,
+        ysb: ysb
+    };
 }
-var OpenSimplexNoise = (function () {
-    function OpenSimplexNoise(clientSeed) {
-        this.initialize();
-        this.perm = new Uint8Array(256);
-        this.perm2D = new Uint8Array(256);
-        this.perm3D = new Uint8Array(256);
-        this.perm4D = new Uint8Array(256);
-        var source = new Uint8Array(256);
-        for (var i = 0; i < 256; i++)
-            source[i] = i;
-        var seed = new Uint32Array(1);
-        seed[0] = clientSeed;
-        seed = shuffleSeed(shuffleSeed(shuffleSeed(seed)));
-        for (var i = 255; i >= 0; i--) {
-            seed = shuffleSeed(seed);
-            var r = new Uint32Array(1);
-            r[0] = (seed[0] + 31) % (i + 1);
-            if (r[0] < 0)
-                r[0] += (i + 1);
-            this.perm[i] = source[r[0]];
-            this.perm2D[i] = this.perm[i] & 0x0E;
-            this.perm3D[i] = (this.perm[i] % 24) * 3;
-            this.perm4D[i] = this.perm[i] & 0xFC;
-            source[r[0]] = source[i];
+function contribution3D(multiplier, xsb, ysb, zsb) {
+    return {
+        dx: -xsb - multiplier * constants_1.SQUISH_3D,
+        dy: -ysb - multiplier * constants_1.SQUISH_3D,
+        dz: -zsb - multiplier * constants_1.SQUISH_3D,
+        xsb: xsb,
+        ysb: ysb,
+        zsb: zsb
+    };
+}
+function contribution4D(multiplier, xsb, ysb, zsb, wsb) {
+    return {
+        dx: -xsb - multiplier * constants_1.SQUISH_4D,
+        dy: -ysb - multiplier * constants_1.SQUISH_4D,
+        dz: -zsb - multiplier * constants_1.SQUISH_4D,
+        dw: -wsb - multiplier * constants_1.SQUISH_4D,
+        xsb: xsb,
+        ysb: ysb,
+        zsb: zsb,
+        wsb: wsb
+    };
+}
+function makeNoise2D(clientSeed) {
+    var contributions = [];
+    for (var i = 0; i < constants_1.p2D.length; i += 4) {
+        var baseSet = constants_1.base2D[constants_1.p2D[i]];
+        var previous = null;
+        var current = null;
+        for (var k = 0; k < baseSet.length; k += 3) {
+            current = contribution2D(baseSet[k], baseSet[k + 1], baseSet[k + 2]);
+            if (previous === null)
+                contributions[i / 4] = current;
+            else
+                previous.next = current;
+            previous = current;
         }
+        current.next = contribution2D(constants_1.p2D[i + 1], constants_1.p2D[i + 2], constants_1.p2D[i + 3]);
     }
-    OpenSimplexNoise.prototype.noise2D = function (x, y) {
+    var lookup = [];
+    for (var i = 0; i < constants_1.lookupPairs2D.length; i += 2) {
+        lookup[constants_1.lookupPairs2D[i]] = contributions[constants_1.lookupPairs2D[i + 1]];
+    }
+    var perm = new Uint8Array(256);
+    var perm2D = new Uint8Array(256);
+    var source = new Uint8Array(256);
+    for (var i = 0; i < 256; i++)
+        source[i] = i;
+    var seed = new Uint32Array(1);
+    seed[0] = clientSeed;
+    seed = shuffleSeed(shuffleSeed(shuffleSeed(seed)));
+    for (var i = 255; i >= 0; i--) {
+        seed = shuffleSeed(seed);
+        var r = new Uint32Array(1);
+        r[0] = (seed[0] + 31) % (i + 1);
+        if (r[0] < 0)
+            r[0] += i + 1;
+        perm[i] = source[r[0]];
+        perm2D[i] = perm[i] & 0x0e;
+        source[r[0]] = source[i];
+    }
+    return function (x, y) {
         var stretchOffset = (x + y) * constants_1.STRETCH_2D;
-        var _a = [x + stretchOffset, y + stretchOffset], xs = _a[0], ys = _a[1];
-        var _b = [Math.floor(xs), Math.floor(ys)], xsb = _b[0], ysb = _b[1];
+        var xs = x + stretchOffset;
+        var ys = y + stretchOffset;
+        var xsb = Math.floor(xs);
+        var ysb = Math.floor(ys);
         var squishOffset = (xsb + ysb) * constants_1.SQUISH_2D;
-        var _c = [x - (xsb + squishOffset), y - (ysb + squishOffset)], dx0 = _c[0], dy0 = _c[1];
-        var _d = [xs - xsb, ys - ysb], xins = _d[0], yins = _d[1];
+        var dx0 = x - (xsb + squishOffset);
+        var dy0 = y - (ysb + squishOffset);
+        var xins = xs - xsb;
+        var yins = ys - ysb;
         var inSum = xins + yins;
-        var hashVals = new Uint32Array(4);
-        hashVals[0] = xins - yins + 1;
-        hashVals[1] = inSum;
-        hashVals[2] = inSum + yins;
-        hashVals[3] = inSum + xins;
-        var hash = hashVals[0] | (hashVals[1] << 1) | (hashVals[2] << 2) | (hashVals[3] << 4);
-        var c = this.lookup2D[hash];
-        var value = 0.0;
-        while (typeof c !== 'undefined') {
-            var _e = [dx0 + c.dx, dy0 + c.dy], dx = _e[0], dy = _e[1];
+        var hash = (xins - yins + 1) |
+            (inSum << 1) |
+            ((inSum + yins) << 2) |
+            ((inSum + xins) << 4);
+        var value = 0;
+        for (var c = lookup[hash]; c !== undefined; c = c.next) {
+            var dx = dx0 + c.dx;
+            var dy = dy0 + c.dy;
             var attn = 2 - dx * dx - dy * dy;
             if (attn > 0) {
-                var _f = [xsb + c.xsb, ysb + c.ysb], px = _f[0], py = _f[1];
-                var i = this.perm2D[(this.perm[px & 0xFF] + py) & 0xFF];
-                var valuePart = constants_1.gradients2D[i] * dx + constants_1.gradients2D[i + 1] * dy;
-                attn *= attn;
-                value += attn * attn * valuePart;
+                var px = xsb + c.xsb;
+                var py = ysb + c.ysb;
+                var indexPartA = perm[px & 0xff];
+                var index = perm2D[(indexPartA + py) & 0xff];
+                var valuePart = constants_1.gradients2D[index] * dx + constants_1.gradients2D[index + 1] * dy;
+                value += attn * attn * attn * attn * valuePart;
             }
-            c = c.next;
         }
         return value * constants_1.NORM_2D;
     };
-    OpenSimplexNoise.prototype.noise3D = function (x, y, z) {
+}
+exports.makeNoise2D = makeNoise2D;
+function makeNoise3D(clientSeed) {
+    var contributions = [];
+    for (var i = 0; i < constants_1.p3D.length; i += 9) {
+        var baseSet = constants_1.base3D[constants_1.p3D[i]];
+        var previous = null;
+        var current = null;
+        for (var k = 0; k < baseSet.length; k += 4) {
+            current = contribution3D(baseSet[k], baseSet[k + 1], baseSet[k + 2], baseSet[k + 3]);
+            if (previous === null)
+                contributions[i / 9] = current;
+            else
+                previous.next = current;
+            previous = current;
+        }
+        current.next = contribution3D(constants_1.p3D[i + 1], constants_1.p3D[i + 2], constants_1.p3D[i + 3], constants_1.p3D[i + 4]);
+        current.next.next = contribution3D(constants_1.p3D[i + 5], constants_1.p3D[i + 6], constants_1.p3D[i + 7], constants_1.p3D[i + 8]);
+    }
+    var lookup = [];
+    for (var i = 0; i < constants_1.lookupPairs3D.length; i += 2) {
+        lookup[constants_1.lookupPairs3D[i]] = contributions[constants_1.lookupPairs3D[i + 1]];
+    }
+    var perm = new Uint8Array(256);
+    var perm3D = new Uint8Array(256);
+    var source = new Uint8Array(256);
+    for (var i = 0; i < 256; i++)
+        source[i] = i;
+    var seed = new Uint32Array(1);
+    seed[0] = clientSeed;
+    seed = shuffleSeed(shuffleSeed(shuffleSeed(seed)));
+    for (var i = 255; i >= 0; i--) {
+        seed = shuffleSeed(seed);
+        var r = new Uint32Array(1);
+        r[0] = (seed[0] + 31) % (i + 1);
+        if (r[0] < 0)
+            r[0] += i + 1;
+        perm[i] = source[r[0]];
+        perm3D[i] = (perm[i] % 24) * 3;
+        source[r[0]] = source[i];
+    }
+    return function (x, y, z) {
         var stretchOffset = (x + y + z) * constants_1.STRETCH_3D;
-        var _a = [x + stretchOffset, y + stretchOffset, z + stretchOffset], xs = _a[0], ys = _a[1], zs = _a[2];
-        var _b = [Math.floor(xs), Math.floor(ys), Math.floor(zs)], xsb = _b[0], ysb = _b[1], zsb = _b[2];
+        var xs = x + stretchOffset;
+        var ys = y + stretchOffset;
+        var zs = z + stretchOffset;
+        var xsb = Math.floor(xs);
+        var ysb = Math.floor(ys);
+        var zsb = Math.floor(zs);
         var squishOffset = (xsb + ysb + zsb) * constants_1.SQUISH_3D;
-        var _c = [x - (xsb + squishOffset), y - (ysb + squishOffset), z - (zsb + squishOffset)], dx0 = _c[0], dy0 = _c[1], dz0 = _c[2];
-        var _d = [xs - xsb, ys - ysb, zs - zsb], xins = _d[0], yins = _d[1], zins = _d[2];
+        var dx0 = x - (xsb + squishOffset);
+        var dy0 = y - (ysb + squishOffset);
+        var dz0 = z - (zsb + squishOffset);
+        var xins = xs - xsb;
+        var yins = ys - ysb;
+        var zins = zs - zsb;
         var inSum = xins + yins + zins;
-        var hashVals = new Uint32Array(7);
-        hashVals[0] = yins - zins + 1;
-        hashVals[1] = xins - yins + 1;
-        hashVals[2] = xins - zins + 1;
-        hashVals[3] = inSum;
-        hashVals[4] = inSum + zins;
-        hashVals[5] = inSum + yins;
-        hashVals[6] = inSum + xins;
-        var hash = hashVals[0] | hashVals[1] << 1 | hashVals[2] << 2 | hashVals[3] << 3 | hashVals[4] << 5 |
-            hashVals[5] << 7 | hashVals[6] << 9;
-        var c = this.lookup3D[hash];
-        var value = 0.0;
-        while (typeof c !== 'undefined') {
-            var _e = [dx0 + c.dx, dy0 + c.dy, dz0 + c.dz], dx = _e[0], dy = _e[1], dz = _e[2];
+        var hash = (yins - zins + 1) |
+            ((xins - yins + 1) << 1) |
+            ((xins - zins + 1) << 2) |
+            (inSum << 3) |
+            ((inSum + zins) << 5) |
+            ((inSum + yins) << 7) |
+            ((inSum + xins) << 9);
+        var value = 0;
+        for (var c = lookup[hash]; c !== undefined; c = c.next) {
+            var dx = dx0 + c.dx;
+            var dy = dy0 + c.dy;
+            var dz = dz0 + c.dz;
             var attn = 2 - dx * dx - dy * dy - dz * dz;
             if (attn > 0) {
-                var _f = [xsb + c.xsb, ysb + c.ysb, zsb + c.zsb], px = _f[0], py = _f[1], pz = _f[2];
-                var i = this.perm3D[(this.perm[(this.perm[px & 0xFF] + py) & 0xFF] + pz) & 0xFF];
-                var valuePart = constants_1.gradients3D[i] * dx + constants_1.gradients3D[i + 1] * dy + constants_1.gradients3D[i + 2] * dz;
-                attn *= attn;
-                value += attn * attn * valuePart;
+                var px = xsb + c.xsb;
+                var py = ysb + c.ysb;
+                var pz = zsb + c.zsb;
+                var indexPartA = perm[px & 0xff];
+                var indexPartB = perm[(indexPartA + py) & 0xff];
+                var index = perm3D[(indexPartB + pz) & 0xff];
+                var valuePart = constants_1.gradients3D[index] * dx +
+                    constants_1.gradients3D[index + 1] * dy +
+                    constants_1.gradients3D[index + 2] * dz;
+                value += attn * attn * attn * attn * valuePart;
             }
-            c = c.next;
         }
         return value * constants_1.NORM_3D;
     };
-    OpenSimplexNoise.prototype.noise4D = function (x, y, z, w) {
+}
+exports.makeNoise3D = makeNoise3D;
+function makeNoise4D(clientSeed) {
+    var contributions = [];
+    for (var i = 0; i < constants_1.p4D.length; i += 16) {
+        var baseSet = constants_1.base4D[constants_1.p4D[i]];
+        var previous = null;
+        var current = null;
+        for (var k = 0; k < baseSet.length; k += 5) {
+            current = contribution4D(baseSet[k], baseSet[k + 1], baseSet[k + 2], baseSet[k + 3], baseSet[k + 4]);
+            if (previous === null)
+                contributions[i / 16] = current;
+            else
+                previous.next = current;
+            previous = current;
+        }
+        current.next = contribution4D(constants_1.p4D[i + 1], constants_1.p4D[i + 2], constants_1.p4D[i + 3], constants_1.p4D[i + 4], constants_1.p4D[i + 5]);
+        current.next.next = contribution4D(constants_1.p4D[i + 6], constants_1.p4D[i + 7], constants_1.p4D[i + 8], constants_1.p4D[i + 9], constants_1.p4D[i + 10]);
+        current.next.next.next = contribution4D(constants_1.p4D[i + 11], constants_1.p4D[i + 12], constants_1.p4D[i + 13], constants_1.p4D[i + 14], constants_1.p4D[i + 15]);
+    }
+    var lookup = [];
+    for (var i = 0; i < constants_1.lookupPairs4D.length; i += 2) {
+        lookup[constants_1.lookupPairs4D[i]] = contributions[constants_1.lookupPairs4D[i + 1]];
+    }
+    var perm = new Uint8Array(256);
+    var perm4D = new Uint8Array(256);
+    var source = new Uint8Array(256);
+    for (var i = 0; i < 256; i++)
+        source[i] = i;
+    var seed = new Uint32Array(1);
+    seed[0] = clientSeed;
+    seed = shuffleSeed(shuffleSeed(shuffleSeed(seed)));
+    for (var i = 255; i >= 0; i--) {
+        seed = shuffleSeed(seed);
+        var r = new Uint32Array(1);
+        r[0] = (seed[0] + 31) % (i + 1);
+        if (r[0] < 0)
+            r[0] += i + 1;
+        perm[i] = source[r[0]];
+        perm4D[i] = perm[i] & 0xfc;
+        source[r[0]] = source[i];
+    }
+    return function (x, y, z, w) {
         var stretchOffset = (x + y + z + w) * constants_1.STRETCH_4D;
-        var _a = [x + stretchOffset, y + stretchOffset, z + stretchOffset, w + stretchOffset], xs = _a[0], ys = _a[1], zs = _a[2], ws = _a[3];
-        var _b = [Math.floor(xs), Math.floor(ys), Math.floor(zs), Math.floor(ws)], xsb = _b[0], ysb = _b[1], zsb = _b[2], wsb = _b[3];
+        var xs = x + stretchOffset;
+        var ys = y + stretchOffset;
+        var zs = z + stretchOffset;
+        var ws = w + stretchOffset;
+        var xsb = Math.floor(xs);
+        var ysb = Math.floor(ys);
+        var zsb = Math.floor(zs);
+        var wsb = Math.floor(ws);
         var squishOffset = (xsb + ysb + zsb + wsb) * constants_1.SQUISH_4D;
         var dx0 = x - (xsb + squishOffset);
         var dy0 = y - (ysb + squishOffset);
         var dz0 = z - (zsb + squishOffset);
         var dw0 = w - (wsb + squishOffset);
-        var _c = [xs - xsb, ys - ysb, zs - zsb, ws - wsb], xins = _c[0], yins = _c[1], zins = _c[2], wins = _c[3];
+        var xins = xs - xsb;
+        var yins = ys - ysb;
+        var zins = zs - zsb;
+        var wins = ws - wsb;
         var inSum = xins + yins + zins + wins;
-        var hashVals = new Uint32Array(11);
-        hashVals[0] = zins - wins + 1;
-        hashVals[1] = yins - zins + 1;
-        hashVals[2] = yins - wins + 1;
-        hashVals[3] = xins - yins + 1;
-        hashVals[4] = xins - zins + 1;
-        hashVals[5] = xins - wins + 1;
-        hashVals[6] = inSum << 6;
-        hashVals[7] = inSum + wins;
-        hashVals[8] = inSum + zins;
-        hashVals[9] = inSum + yins;
-        hashVals[10] = inSum + xins;
-        var hash = hashVals[0] | hashVals[1] << 1 | hashVals[2] << 2 | hashVals[3] << 3 | hashVals[4] << 4 | hashVals[5] << 5 |
-            hashVals[6] << 6 | hashVals[7] << 8 | hashVals[8] << 11 | hashVals[9] << 14 | hashVals[10] << 17;
-        var c = this.lookup4D[hash];
-        var value = 0.0;
-        while (typeof c !== 'undefined') {
-            var _d = [dx0 + c.dx, dy0 + c.dy, dz0 + c.dz, dw0 + c.dw], dx = _d[0], dy = _d[1], dz = _d[2], dw = _d[3];
+        var hash = (zins - wins + 1) |
+            ((yins - zins + 1) << 1) |
+            ((yins - wins + 1) << 2) |
+            ((xins - yins + 1) << 3) |
+            ((xins - zins + 1) << 4) |
+            ((xins - wins + 1) << 5) |
+            (inSum << 6) |
+            ((inSum + wins) << 8) |
+            ((inSum + zins) << 11) |
+            ((inSum + yins) << 14) |
+            ((inSum + xins) << 17);
+        var value = 0;
+        for (var c = lookup[hash]; c !== undefined; c = c.next) {
+            var dx = dx0 + c.dx;
+            var dy = dy0 + c.dy;
+            var dz = dz0 + c.dz;
+            var dw = dw0 + c.dw;
             var attn = 2 - dx * dx - dy * dy - dz * dz - dw * dw;
             if (attn > 0) {
-                var _e = [xsb + c.xsb, ysb + c.ysb, zsb + c.zsb, wsb + c.wsb], px = _e[0], py = _e[1], pz = _e[2], pw = _e[3];
-                var i = this.perm4D[(this.perm[(this.perm[(this.perm[px & 0xFF] + py) & 0xFF] + pz) & 0xFF] + pw) & 0xFF];
-                var valuePart = constants_1.gradients4D[i] * dx + constants_1.gradients4D[i + 1] * dy + constants_1.gradients4D[i + 2] * dz + constants_1.gradients4D[i + 3] * dw;
-                attn *= attn;
-                value += attn * attn * valuePart;
+                var px = xsb + c.xsb;
+                var py = ysb + c.ysb;
+                var pz = zsb + c.zsb;
+                var pw = wsb + c.wsb;
+                var indexPartA = perm[px & 0xff];
+                var indexPartB = perm[(indexPartA + py) & 0xff];
+                var indexPartC = perm[(indexPartB + pz) & 0xff];
+                var index = perm4D[(indexPartC + pw) & 0xff];
+                var valuePart = constants_1.gradients4D[index] * dx +
+                    constants_1.gradients4D[index + 1] * dy +
+                    constants_1.gradients4D[index + 2] * dz +
+                    constants_1.gradients4D[index + 3] * dw;
+                value += attn * attn * attn * attn * valuePart;
             }
-            c = c.next;
         }
         return value * constants_1.NORM_4D;
     };
-    OpenSimplexNoise.prototype.initialize = function () {
-        var contributions2D = [];
-        for (var i = 0; i < constants_1.p2D.length; i += 4) {
-            var baseSet = constants_1.base2D[constants_1.p2D[i]];
-            var previous = null;
-            var current = null;
-            for (var k = 0; k < baseSet.length; k += 3) {
-                current = new Contribution2(baseSet[k], baseSet[k + 1], baseSet[k + 2]);
-                if (previous === null)
-                    contributions2D[i / 4] = current;
-                else
-                    previous.next = current;
-                previous = current;
-            }
-            current.next = new Contribution2(constants_1.p2D[i + 1], constants_1.p2D[i + 2], constants_1.p2D[i + 3]);
-        }
-        this.lookup2D = [];
-        for (var i = 0; i < constants_1.lookupPairs2D.length; i += 2) {
-            this.lookup2D[constants_1.lookupPairs2D[i]] = contributions2D[constants_1.lookupPairs2D[i + 1]];
-        }
-        var contributions3D = [];
-        for (var i = 0; i < constants_1.p3D.length; i += 9) {
-            var baseSet = constants_1.base3D[constants_1.p3D[i]];
-            var previous = null;
-            var current = null;
-            for (var k = 0; k < baseSet.length; k += 4) {
-                current = new Contribution3(baseSet[k], baseSet[k + 1], baseSet[k + 2], baseSet[k + 3]);
-                if (previous === null)
-                    contributions3D[i / 9] = current;
-                else
-                    previous.next = current;
-                previous = current;
-            }
-            current.next = new Contribution3(constants_1.p3D[i + 1], constants_1.p3D[i + 2], constants_1.p3D[i + 3], constants_1.p3D[i + 4]);
-            current.next.next = new Contribution3(constants_1.p3D[i + 5], constants_1.p3D[i + 6], constants_1.p3D[i + 7], constants_1.p3D[i + 8]);
-        }
-        this.lookup3D = [];
-        for (var i = 0; i < constants_1.lookupPairs3D.length; i += 2) {
-            this.lookup3D[constants_1.lookupPairs3D[i]] = contributions3D[constants_1.lookupPairs3D[i + 1]];
-        }
-        var contributions4D = [];
-        for (var i = 0; i < constants_1.p4D.length; i += 16) {
-            var baseSet = constants_1.base4D[constants_1.p4D[i]];
-            var previous = null;
-            var current = null;
-            for (var k = 0; k < baseSet.length; k += 5) {
-                current = new Contribution4(baseSet[k], baseSet[k + 1], baseSet[k + 2], baseSet[k + 3], baseSet[k + 4]);
-                if (previous === null)
-                    contributions4D[i / 16] = current;
-                else
-                    previous.next = current;
-                previous = current;
-            }
-            current.next = new Contribution4(constants_1.p4D[i + 1], constants_1.p4D[i + 2], constants_1.p4D[i + 3], constants_1.p4D[i + 4], constants_1.p4D[i + 5]);
-            current.next.next = new Contribution4(constants_1.p4D[i + 6], constants_1.p4D[i + 7], constants_1.p4D[i + 8], constants_1.p4D[i + 9], constants_1.p4D[i + 10]);
-            current.next.next.next = new Contribution4(constants_1.p4D[i + 11], constants_1.p4D[i + 12], constants_1.p4D[i + 13], constants_1.p4D[i + 14], constants_1.p4D[i + 15]);
-        }
-        this.lookup4D = [];
-        for (var i = 0; i < constants_1.lookupPairs4D.length; i += 2) {
-            this.lookup4D[constants_1.lookupPairs4D[i]] = contributions4D[constants_1.lookupPairs4D[i + 1]];
-        }
-    };
-    return OpenSimplexNoise;
-}());
-exports.default = OpenSimplexNoise;
+}
+exports.makeNoise4D = makeNoise4D;
+function shuffleSeed(seed) {
+    var newSeed = new Uint32Array(1);
+    newSeed[0] = seed[0] * 1664525 + 1013904223;
+    return newSeed;
+}
 
 
 /***/ }),
@@ -18054,154 +18202,3279 @@ exports.base4D = [
     [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1],
     [3, 1, 1, 1, 0, 3, 1, 1, 0, 1, 3, 1, 0, 1, 1, 3, 0, 1, 1, 1, 4, 1, 1, 1, 1],
     [
-        1, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 2, 1, 1, 0, 0, 2, 1, 0, 1, 0, 2, 1, 0, 0, 1, 2, 0, 1, 1,
-        0, 2, 0, 1, 0, 1, 2, 0, 0, 1, 1
+        1,
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1,
+        2,
+        1,
+        1,
+        0,
+        0,
+        2,
+        1,
+        0,
+        1,
+        0,
+        2,
+        1,
+        0,
+        0,
+        1,
+        2,
+        0,
+        1,
+        1,
+        0,
+        2,
+        0,
+        1,
+        0,
+        1,
+        2,
+        0,
+        0,
+        1,
+        1
     ],
     [
-        3, 1, 1, 1, 0, 3, 1, 1, 0, 1, 3, 1, 0, 1, 1, 3, 0, 1, 1, 1, 2, 1, 1, 0, 0, 2, 1, 0, 1, 0, 2, 1, 0, 0, 1, 2, 0, 1, 1,
-        0, 2, 0, 1, 0, 1, 2, 0, 0, 1, 1
+        3,
+        1,
+        1,
+        1,
+        0,
+        3,
+        1,
+        1,
+        0,
+        1,
+        3,
+        1,
+        0,
+        1,
+        1,
+        3,
+        0,
+        1,
+        1,
+        1,
+        2,
+        1,
+        1,
+        0,
+        0,
+        2,
+        1,
+        0,
+        1,
+        0,
+        2,
+        1,
+        0,
+        0,
+        1,
+        2,
+        0,
+        1,
+        1,
+        0,
+        2,
+        0,
+        1,
+        0,
+        1,
+        2,
+        0,
+        0,
+        1,
+        1
     ]
 ];
-exports.gradients2D = [5, 2, 2, 5, -5, 2, -2, 5, 5, -2, 2, -5, -5, -2, -2, -5];
+exports.gradients2D = [
+    5,
+    2,
+    2,
+    5,
+    -5,
+    2,
+    -2,
+    5,
+    5,
+    -2,
+    2,
+    -5,
+    -5,
+    -2,
+    -2,
+    -5
+];
 exports.gradients3D = [
-    -11, 4, 4, -4, 11, 4, -4, 4, 11,
-    11, 4, 4, 4, 11, 4, 4, 4, 11,
-    -11, -4, 4, -4, -11, 4, -4, -4, 11,
-    11, -4, 4, 4, -11, 4, 4, -4, 11,
-    -11, 4, -4, -4, 11, -4, -4, 4, -11,
-    11, 4, -4, 4, 11, -4, 4, 4, -11,
-    -11, -4, -4, -4, -11, -4, -4, -4, -11,
-    11, -4, -4, 4, -11, -4, 4, -4, -11
+    -11,
+    4,
+    4,
+    -4,
+    11,
+    4,
+    -4,
+    4,
+    11,
+    11,
+    4,
+    4,
+    4,
+    11,
+    4,
+    4,
+    4,
+    11,
+    -11,
+    -4,
+    4,
+    -4,
+    -11,
+    4,
+    -4,
+    -4,
+    11,
+    11,
+    -4,
+    4,
+    4,
+    -11,
+    4,
+    4,
+    -4,
+    11,
+    -11,
+    4,
+    -4,
+    -4,
+    11,
+    -4,
+    -4,
+    4,
+    -11,
+    11,
+    4,
+    -4,
+    4,
+    11,
+    -4,
+    4,
+    4,
+    -11,
+    -11,
+    -4,
+    -4,
+    -4,
+    -11,
+    -4,
+    -4,
+    -4,
+    -11,
+    11,
+    -4,
+    -4,
+    4,
+    -11,
+    -4,
+    4,
+    -4,
+    -11
 ];
 exports.gradients4D = [
-    3, 1, 1, 1, 1, 3, 1, 1, 1, 1, 3, 1, 1, 1, 1, 3,
-    -3, 1, 1, 1, -1, 3, 1, 1, -1, 1, 3, 1, -1, 1, 1, 3,
-    3, -1, 1, 1, 1, -3, 1, 1, 1, -1, 3, 1, 1, -1, 1, 3,
-    -3, -1, 1, 1, -1, -3, 1, 1, -1, -1, 3, 1, -1, -1, 1, 3,
-    3, 1, -1, 1, 1, 3, -1, 1, 1, 1, -3, 1, 1, 1, -1, 3,
-    -3, 1, -1, 1, -1, 3, -1, 1, -1, 1, -3, 1, -1, 1, -1, 3,
-    3, -1, -1, 1, 1, -3, -1, 1, 1, -1, -3, 1, 1, -1, -1, 3,
-    -3, -1, -1, 1, -1, -3, -1, 1, -1, -1, -3, 1, -1, -1, -1, 3,
-    3, 1, 1, -1, 1, 3, 1, -1, 1, 1, 3, -1, 1, 1, 1, -3,
-    -3, 1, 1, -1, -1, 3, 1, -1, -1, 1, 3, -1, -1, 1, 1, -3,
-    3, -1, 1, -1, 1, -3, 1, -1, 1, -1, 3, -1, 1, -1, 1, -3,
-    -3, -1, 1, -1, -1, -3, 1, -1, -1, -1, 3, -1, -1, -1, 1, -3,
-    3, 1, -1, -1, 1, 3, -1, -1, 1, 1, -3, -1, 1, 1, -1, -3,
-    -3, 1, -1, -1, -1, 3, -1, -1, -1, 1, -3, -1, -1, 1, -1, -3,
-    3, -1, -1, -1, 1, -3, -1, -1, 1, -1, -3, -1, 1, -1, -1, -3,
-    -3, -1, -1, -1, -1, -3, -1, -1, -1, -1, -3, -1, -1, -1, -1, -3
+    3,
+    1,
+    1,
+    1,
+    1,
+    3,
+    1,
+    1,
+    1,
+    1,
+    3,
+    1,
+    1,
+    1,
+    1,
+    3,
+    -3,
+    1,
+    1,
+    1,
+    -1,
+    3,
+    1,
+    1,
+    -1,
+    1,
+    3,
+    1,
+    -1,
+    1,
+    1,
+    3,
+    3,
+    -1,
+    1,
+    1,
+    1,
+    -3,
+    1,
+    1,
+    1,
+    -1,
+    3,
+    1,
+    1,
+    -1,
+    1,
+    3,
+    -3,
+    -1,
+    1,
+    1,
+    -1,
+    -3,
+    1,
+    1,
+    -1,
+    -1,
+    3,
+    1,
+    -1,
+    -1,
+    1,
+    3,
+    3,
+    1,
+    -1,
+    1,
+    1,
+    3,
+    -1,
+    1,
+    1,
+    1,
+    -3,
+    1,
+    1,
+    1,
+    -1,
+    3,
+    -3,
+    1,
+    -1,
+    1,
+    -1,
+    3,
+    -1,
+    1,
+    -1,
+    1,
+    -3,
+    1,
+    -1,
+    1,
+    -1,
+    3,
+    3,
+    -1,
+    -1,
+    1,
+    1,
+    -3,
+    -1,
+    1,
+    1,
+    -1,
+    -3,
+    1,
+    1,
+    -1,
+    -1,
+    3,
+    -3,
+    -1,
+    -1,
+    1,
+    -1,
+    -3,
+    -1,
+    1,
+    -1,
+    -1,
+    -3,
+    1,
+    -1,
+    -1,
+    -1,
+    3,
+    3,
+    1,
+    1,
+    -1,
+    1,
+    3,
+    1,
+    -1,
+    1,
+    1,
+    3,
+    -1,
+    1,
+    1,
+    1,
+    -3,
+    -3,
+    1,
+    1,
+    -1,
+    -1,
+    3,
+    1,
+    -1,
+    -1,
+    1,
+    3,
+    -1,
+    -1,
+    1,
+    1,
+    -3,
+    3,
+    -1,
+    1,
+    -1,
+    1,
+    -3,
+    1,
+    -1,
+    1,
+    -1,
+    3,
+    -1,
+    1,
+    -1,
+    1,
+    -3,
+    -3,
+    -1,
+    1,
+    -1,
+    -1,
+    -3,
+    1,
+    -1,
+    -1,
+    -1,
+    3,
+    -1,
+    -1,
+    -1,
+    1,
+    -3,
+    3,
+    1,
+    -1,
+    -1,
+    1,
+    3,
+    -1,
+    -1,
+    1,
+    1,
+    -3,
+    -1,
+    1,
+    1,
+    -1,
+    -3,
+    -3,
+    1,
+    -1,
+    -1,
+    -1,
+    3,
+    -1,
+    -1,
+    -1,
+    1,
+    -3,
+    -1,
+    -1,
+    1,
+    -1,
+    -3,
+    3,
+    -1,
+    -1,
+    -1,
+    1,
+    -3,
+    -1,
+    -1,
+    1,
+    -1,
+    -3,
+    -1,
+    1,
+    -1,
+    -1,
+    -3,
+    -3,
+    -1,
+    -1,
+    -1,
+    -1,
+    -3,
+    -1,
+    -1,
+    -1,
+    -1,
+    -3,
+    -1,
+    -1,
+    -1,
+    -1,
+    -3
 ];
-exports.lookupPairs2D = [0, 1, 1, 0, 4, 1, 17, 0, 20, 2, 21, 2, 22, 5, 23, 5, 26, 4, 39, 3, 42, 4, 43, 3];
+exports.lookupPairs2D = [
+    0,
+    1,
+    1,
+    0,
+    4,
+    1,
+    17,
+    0,
+    20,
+    2,
+    21,
+    2,
+    22,
+    5,
+    23,
+    5,
+    26,
+    4,
+    39,
+    3,
+    42,
+    4,
+    43,
+    3
+];
 exports.lookupPairs3D = [
-    0, 2, 1, 1, 2, 2, 5, 1, 6, 0, 7, 0, 32, 2, 34, 2, 129, 1, 133, 1, 160, 5, 161, 5, 518, 0, 519, 0, 546, 4, 550, 4, 645,
-    3, 647, 3, 672, 5, 673, 5, 674, 4, 677, 3, 678, 4, 679, 3, 680, 13, 681, 13, 682, 12, 685, 14, 686, 12, 687, 14, 712,
-    20, 714, 18, 809, 21, 813, 23, 840, 20, 841, 21, 1198, 19, 1199, 22, 1226, 18, 1230, 19, 1325, 23, 1327, 22, 1352, 15,
-    1353, 17, 1354, 15, 1357, 17, 1358, 16, 1359, 16, 1360, 11, 1361, 10, 1362, 11, 1365, 10, 1366, 9, 1367, 9, 1392, 11,
-    1394, 11, 1489, 10, 1493, 10, 1520, 8, 1521, 8, 1878, 9, 1879, 9, 1906, 7, 1910, 7, 2005, 6, 2007, 6, 2032, 8, 2033,
-    8, 2034, 7, 2037, 6, 2038, 7, 2039, 6
+    0,
+    2,
+    1,
+    1,
+    2,
+    2,
+    5,
+    1,
+    6,
+    0,
+    7,
+    0,
+    32,
+    2,
+    34,
+    2,
+    129,
+    1,
+    133,
+    1,
+    160,
+    5,
+    161,
+    5,
+    518,
+    0,
+    519,
+    0,
+    546,
+    4,
+    550,
+    4,
+    645,
+    3,
+    647,
+    3,
+    672,
+    5,
+    673,
+    5,
+    674,
+    4,
+    677,
+    3,
+    678,
+    4,
+    679,
+    3,
+    680,
+    13,
+    681,
+    13,
+    682,
+    12,
+    685,
+    14,
+    686,
+    12,
+    687,
+    14,
+    712,
+    20,
+    714,
+    18,
+    809,
+    21,
+    813,
+    23,
+    840,
+    20,
+    841,
+    21,
+    1198,
+    19,
+    1199,
+    22,
+    1226,
+    18,
+    1230,
+    19,
+    1325,
+    23,
+    1327,
+    22,
+    1352,
+    15,
+    1353,
+    17,
+    1354,
+    15,
+    1357,
+    17,
+    1358,
+    16,
+    1359,
+    16,
+    1360,
+    11,
+    1361,
+    10,
+    1362,
+    11,
+    1365,
+    10,
+    1366,
+    9,
+    1367,
+    9,
+    1392,
+    11,
+    1394,
+    11,
+    1489,
+    10,
+    1493,
+    10,
+    1520,
+    8,
+    1521,
+    8,
+    1878,
+    9,
+    1879,
+    9,
+    1906,
+    7,
+    1910,
+    7,
+    2005,
+    6,
+    2007,
+    6,
+    2032,
+    8,
+    2033,
+    8,
+    2034,
+    7,
+    2037,
+    6,
+    2038,
+    7,
+    2039,
+    6
 ];
 exports.lookupPairs4D = [
-    0, 3, 1, 2, 2, 3, 5, 2, 6, 1, 7, 1, 8, 3, 9, 2, 10, 3, 13, 2, 16, 3, 18, 3, 22, 1, 23, 1, 24, 3, 26, 3, 33, 2, 37, 2,
-    38, 1, 39, 1, 41, 2, 45, 2, 54, 1, 55, 1, 56, 0, 57, 0, 58, 0, 59, 0, 60, 0, 61, 0, 62, 0, 63, 0, 256, 3, 258, 3, 264,
-    3, 266, 3, 272, 3, 274, 3, 280, 3, 282, 3, 2049, 2, 2053, 2, 2057, 2, 2061, 2, 2081, 2, 2085, 2, 2089, 2, 2093, 2,
-    2304, 9, 2305, 9, 2312, 9, 2313, 9, 16390, 1, 16391, 1, 16406, 1, 16407, 1, 16422, 1, 16423, 1, 16438, 1, 16439, 1,
-    16642, 8, 16646, 8, 16658, 8, 16662, 8, 18437, 6, 18439, 6, 18469, 6, 18471, 6, 18688, 9, 18689, 9, 18690, 8, 18693,
-    6, 18694, 8, 18695, 6, 18696, 9, 18697, 9, 18706, 8, 18710, 8, 18725, 6, 18727, 6, 131128, 0, 131129, 0, 131130, 0,
-    131131, 0, 131132, 0, 131133, 0, 131134, 0, 131135, 0, 131352, 7, 131354, 7, 131384, 7, 131386, 7, 133161, 5, 133165,
-    5, 133177, 5, 133181, 5, 133376, 9, 133377, 9, 133384, 9, 133385, 9, 133400, 7, 133402, 7, 133417, 5, 133421, 5,
-    133432, 7, 133433, 5, 133434, 7, 133437, 5, 147510, 4, 147511, 4, 147518, 4, 147519, 4, 147714, 8, 147718, 8, 147730,
-    8, 147734, 8, 147736, 7, 147738, 7, 147766, 4, 147767, 4, 147768, 7, 147770, 7, 147774, 4, 147775, 4, 149509, 6,
-    149511, 6, 149541, 6, 149543, 6, 149545, 5, 149549, 5, 149558, 4, 149559, 4, 149561, 5, 149565, 5, 149566, 4, 149567,
-    4, 149760, 9, 149761, 9, 149762, 8, 149765, 6, 149766, 8, 149767, 6, 149768, 9, 149769, 9, 149778, 8, 149782, 8,
-    149784, 7, 149786, 7, 149797, 6, 149799, 6, 149801, 5, 149805, 5, 149814, 4, 149815, 4, 149816, 7, 149817, 5, 149818,
-    7, 149821, 5, 149822, 4, 149823, 4, 149824, 37, 149825, 37, 149826, 36, 149829, 34, 149830, 36, 149831, 34, 149832,
-    37, 149833, 37, 149842, 36, 149846, 36, 149848, 35, 149850, 35, 149861, 34, 149863, 34, 149865, 33, 149869, 33,
-    149878, 32, 149879, 32, 149880, 35, 149881, 33, 149882, 35, 149885, 33, 149886, 32, 149887, 32, 150080, 49, 150082,
-    48, 150088, 49, 150098, 48, 150104, 47, 150106, 47, 151873, 46, 151877, 45, 151881, 46, 151909, 45, 151913, 44,
-    151917, 44, 152128, 49, 152129, 46, 152136, 49, 152137, 46, 166214, 43, 166215, 42, 166230, 43, 166247, 42, 166262,
-    41, 166263, 41, 166466, 48, 166470, 43, 166482, 48, 166486, 43, 168261, 45, 168263, 42, 168293, 45, 168295, 42,
-    168512, 31, 168513, 28, 168514, 31, 168517, 28, 168518, 25, 168519, 25, 280952, 40, 280953, 39, 280954, 40, 280957,
-    39, 280958, 38, 280959, 38, 281176, 47, 281178, 47, 281208, 40, 281210, 40, 282985, 44, 282989, 44, 283001, 39,
-    283005, 39, 283208, 30, 283209, 27, 283224, 30, 283241, 27, 283256, 22, 283257, 22, 297334, 41, 297335, 41, 297342,
-    38, 297343, 38, 297554, 29, 297558, 24, 297562, 29, 297590, 24, 297594, 21, 297598, 21, 299365, 26, 299367, 23,
-    299373, 26, 299383, 23, 299389, 20, 299391, 20, 299584, 31, 299585, 28, 299586, 31, 299589, 28, 299590, 25, 299591,
-    25, 299592, 30, 299593, 27, 299602, 29, 299606, 24, 299608, 30, 299610, 29, 299621, 26, 299623, 23, 299625, 27,
-    299629, 26, 299638, 24, 299639, 23, 299640, 22, 299641, 22, 299642, 21, 299645, 20, 299646, 21, 299647, 20, 299648,
-    61, 299649, 60, 299650, 61, 299653, 60, 299654, 59, 299655, 59, 299656, 58, 299657, 57, 299666, 55, 299670, 54,
-    299672, 58, 299674, 55, 299685, 52, 299687, 51, 299689, 57, 299693, 52, 299702, 54, 299703, 51, 299704, 56, 299705,
-    56, 299706, 53, 299709, 50, 299710, 53, 299711, 50, 299904, 61, 299906, 61, 299912, 58, 299922, 55, 299928, 58,
-    299930, 55, 301697, 60, 301701, 60, 301705, 57, 301733, 52, 301737, 57, 301741, 52, 301952, 79, 301953, 79, 301960,
-    76, 301961, 76, 316038, 59, 316039, 59, 316054, 54, 316071, 51, 316086, 54, 316087, 51, 316290, 78, 316294, 78,
-    316306, 73, 316310, 73, 318085, 77, 318087, 77, 318117, 70, 318119, 70, 318336, 79, 318337, 79, 318338, 78, 318341,
-    77, 318342, 78, 318343, 77, 430776, 56, 430777, 56, 430778, 53, 430781, 50, 430782, 53, 430783, 50, 431000, 75,
-    431002, 72, 431032, 75, 431034, 72, 432809, 74, 432813, 69, 432825, 74, 432829, 69, 433032, 76, 433033, 76, 433048,
-    75, 433065, 74, 433080, 75, 433081, 74, 447158, 71, 447159, 68, 447166, 71, 447167, 68, 447378, 73, 447382, 73,
-    447386, 72, 447414, 71, 447418, 72, 447422, 71, 449189, 70, 449191, 70, 449197, 69, 449207, 68, 449213, 69, 449215,
-    68, 449408, 67, 449409, 67, 449410, 66, 449413, 64, 449414, 66, 449415, 64, 449416, 67, 449417, 67, 449426, 66,
-    449430, 66, 449432, 65, 449434, 65, 449445, 64, 449447, 64, 449449, 63, 449453, 63, 449462, 62, 449463, 62, 449464,
-    65, 449465, 63, 449466, 65, 449469, 63, 449470, 62, 449471, 62, 449472, 19, 449473, 19, 449474, 18, 449477, 16,
-    449478, 18, 449479, 16, 449480, 19, 449481, 19, 449490, 18, 449494, 18, 449496, 17, 449498, 17, 449509, 16, 449511,
-    16, 449513, 15, 449517, 15, 449526, 14, 449527, 14, 449528, 17, 449529, 15, 449530, 17, 449533, 15, 449534, 14,
-    449535, 14, 449728, 19, 449729, 19, 449730, 18, 449734, 18, 449736, 19, 449737, 19, 449746, 18, 449750, 18, 449752,
-    17, 449754, 17, 449784, 17, 449786, 17, 451520, 19, 451521, 19, 451525, 16, 451527, 16, 451528, 19, 451529, 19,
-    451557, 16, 451559, 16, 451561, 15, 451565, 15, 451577, 15, 451581, 15, 451776, 19, 451777, 19, 451784, 19, 451785,
-    19, 465858, 18, 465861, 16, 465862, 18, 465863, 16, 465874, 18, 465878, 18, 465893, 16, 465895, 16, 465910, 14,
-    465911, 14, 465918, 14, 465919, 14, 466114, 18, 466118, 18, 466130, 18, 466134, 18, 467909, 16, 467911, 16, 467941,
-    16, 467943, 16, 468160, 13, 468161, 13, 468162, 13, 468163, 13, 468164, 13, 468165, 13, 468166, 13, 468167, 13,
-    580568, 17, 580570, 17, 580585, 15, 580589, 15, 580598, 14, 580599, 14, 580600, 17, 580601, 15, 580602, 17, 580605,
-    15, 580606, 14, 580607, 14, 580824, 17, 580826, 17, 580856, 17, 580858, 17, 582633, 15, 582637, 15, 582649, 15,
-    582653, 15, 582856, 12, 582857, 12, 582872, 12, 582873, 12, 582888, 12, 582889, 12, 582904, 12, 582905, 12, 596982,
-    14, 596983, 14, 596990, 14, 596991, 14, 597202, 11, 597206, 11, 597210, 11, 597214, 11, 597234, 11, 597238, 11,
-    597242, 11, 597246, 11, 599013, 10, 599015, 10, 599021, 10, 599023, 10, 599029, 10, 599031, 10, 599037, 10, 599039,
-    10, 599232, 13, 599233, 13, 599234, 13, 599235, 13, 599236, 13, 599237, 13, 599238, 13, 599239, 13, 599240, 12,
-    599241, 12, 599250, 11, 599254, 11, 599256, 12, 599257, 12, 599258, 11, 599262, 11, 599269, 10, 599271, 10, 599272,
-    12, 599273, 12, 599277, 10, 599279, 10, 599282, 11, 599285, 10, 599286, 11, 599287, 10, 599288, 12, 599289, 12,
-    599290, 11, 599293, 10, 599294, 11, 599295, 10
+    0,
+    3,
+    1,
+    2,
+    2,
+    3,
+    5,
+    2,
+    6,
+    1,
+    7,
+    1,
+    8,
+    3,
+    9,
+    2,
+    10,
+    3,
+    13,
+    2,
+    16,
+    3,
+    18,
+    3,
+    22,
+    1,
+    23,
+    1,
+    24,
+    3,
+    26,
+    3,
+    33,
+    2,
+    37,
+    2,
+    38,
+    1,
+    39,
+    1,
+    41,
+    2,
+    45,
+    2,
+    54,
+    1,
+    55,
+    1,
+    56,
+    0,
+    57,
+    0,
+    58,
+    0,
+    59,
+    0,
+    60,
+    0,
+    61,
+    0,
+    62,
+    0,
+    63,
+    0,
+    256,
+    3,
+    258,
+    3,
+    264,
+    3,
+    266,
+    3,
+    272,
+    3,
+    274,
+    3,
+    280,
+    3,
+    282,
+    3,
+    2049,
+    2,
+    2053,
+    2,
+    2057,
+    2,
+    2061,
+    2,
+    2081,
+    2,
+    2085,
+    2,
+    2089,
+    2,
+    2093,
+    2,
+    2304,
+    9,
+    2305,
+    9,
+    2312,
+    9,
+    2313,
+    9,
+    16390,
+    1,
+    16391,
+    1,
+    16406,
+    1,
+    16407,
+    1,
+    16422,
+    1,
+    16423,
+    1,
+    16438,
+    1,
+    16439,
+    1,
+    16642,
+    8,
+    16646,
+    8,
+    16658,
+    8,
+    16662,
+    8,
+    18437,
+    6,
+    18439,
+    6,
+    18469,
+    6,
+    18471,
+    6,
+    18688,
+    9,
+    18689,
+    9,
+    18690,
+    8,
+    18693,
+    6,
+    18694,
+    8,
+    18695,
+    6,
+    18696,
+    9,
+    18697,
+    9,
+    18706,
+    8,
+    18710,
+    8,
+    18725,
+    6,
+    18727,
+    6,
+    131128,
+    0,
+    131129,
+    0,
+    131130,
+    0,
+    131131,
+    0,
+    131132,
+    0,
+    131133,
+    0,
+    131134,
+    0,
+    131135,
+    0,
+    131352,
+    7,
+    131354,
+    7,
+    131384,
+    7,
+    131386,
+    7,
+    133161,
+    5,
+    133165,
+    5,
+    133177,
+    5,
+    133181,
+    5,
+    133376,
+    9,
+    133377,
+    9,
+    133384,
+    9,
+    133385,
+    9,
+    133400,
+    7,
+    133402,
+    7,
+    133417,
+    5,
+    133421,
+    5,
+    133432,
+    7,
+    133433,
+    5,
+    133434,
+    7,
+    133437,
+    5,
+    147510,
+    4,
+    147511,
+    4,
+    147518,
+    4,
+    147519,
+    4,
+    147714,
+    8,
+    147718,
+    8,
+    147730,
+    8,
+    147734,
+    8,
+    147736,
+    7,
+    147738,
+    7,
+    147766,
+    4,
+    147767,
+    4,
+    147768,
+    7,
+    147770,
+    7,
+    147774,
+    4,
+    147775,
+    4,
+    149509,
+    6,
+    149511,
+    6,
+    149541,
+    6,
+    149543,
+    6,
+    149545,
+    5,
+    149549,
+    5,
+    149558,
+    4,
+    149559,
+    4,
+    149561,
+    5,
+    149565,
+    5,
+    149566,
+    4,
+    149567,
+    4,
+    149760,
+    9,
+    149761,
+    9,
+    149762,
+    8,
+    149765,
+    6,
+    149766,
+    8,
+    149767,
+    6,
+    149768,
+    9,
+    149769,
+    9,
+    149778,
+    8,
+    149782,
+    8,
+    149784,
+    7,
+    149786,
+    7,
+    149797,
+    6,
+    149799,
+    6,
+    149801,
+    5,
+    149805,
+    5,
+    149814,
+    4,
+    149815,
+    4,
+    149816,
+    7,
+    149817,
+    5,
+    149818,
+    7,
+    149821,
+    5,
+    149822,
+    4,
+    149823,
+    4,
+    149824,
+    37,
+    149825,
+    37,
+    149826,
+    36,
+    149829,
+    34,
+    149830,
+    36,
+    149831,
+    34,
+    149832,
+    37,
+    149833,
+    37,
+    149842,
+    36,
+    149846,
+    36,
+    149848,
+    35,
+    149850,
+    35,
+    149861,
+    34,
+    149863,
+    34,
+    149865,
+    33,
+    149869,
+    33,
+    149878,
+    32,
+    149879,
+    32,
+    149880,
+    35,
+    149881,
+    33,
+    149882,
+    35,
+    149885,
+    33,
+    149886,
+    32,
+    149887,
+    32,
+    150080,
+    49,
+    150082,
+    48,
+    150088,
+    49,
+    150098,
+    48,
+    150104,
+    47,
+    150106,
+    47,
+    151873,
+    46,
+    151877,
+    45,
+    151881,
+    46,
+    151909,
+    45,
+    151913,
+    44,
+    151917,
+    44,
+    152128,
+    49,
+    152129,
+    46,
+    152136,
+    49,
+    152137,
+    46,
+    166214,
+    43,
+    166215,
+    42,
+    166230,
+    43,
+    166247,
+    42,
+    166262,
+    41,
+    166263,
+    41,
+    166466,
+    48,
+    166470,
+    43,
+    166482,
+    48,
+    166486,
+    43,
+    168261,
+    45,
+    168263,
+    42,
+    168293,
+    45,
+    168295,
+    42,
+    168512,
+    31,
+    168513,
+    28,
+    168514,
+    31,
+    168517,
+    28,
+    168518,
+    25,
+    168519,
+    25,
+    280952,
+    40,
+    280953,
+    39,
+    280954,
+    40,
+    280957,
+    39,
+    280958,
+    38,
+    280959,
+    38,
+    281176,
+    47,
+    281178,
+    47,
+    281208,
+    40,
+    281210,
+    40,
+    282985,
+    44,
+    282989,
+    44,
+    283001,
+    39,
+    283005,
+    39,
+    283208,
+    30,
+    283209,
+    27,
+    283224,
+    30,
+    283241,
+    27,
+    283256,
+    22,
+    283257,
+    22,
+    297334,
+    41,
+    297335,
+    41,
+    297342,
+    38,
+    297343,
+    38,
+    297554,
+    29,
+    297558,
+    24,
+    297562,
+    29,
+    297590,
+    24,
+    297594,
+    21,
+    297598,
+    21,
+    299365,
+    26,
+    299367,
+    23,
+    299373,
+    26,
+    299383,
+    23,
+    299389,
+    20,
+    299391,
+    20,
+    299584,
+    31,
+    299585,
+    28,
+    299586,
+    31,
+    299589,
+    28,
+    299590,
+    25,
+    299591,
+    25,
+    299592,
+    30,
+    299593,
+    27,
+    299602,
+    29,
+    299606,
+    24,
+    299608,
+    30,
+    299610,
+    29,
+    299621,
+    26,
+    299623,
+    23,
+    299625,
+    27,
+    299629,
+    26,
+    299638,
+    24,
+    299639,
+    23,
+    299640,
+    22,
+    299641,
+    22,
+    299642,
+    21,
+    299645,
+    20,
+    299646,
+    21,
+    299647,
+    20,
+    299648,
+    61,
+    299649,
+    60,
+    299650,
+    61,
+    299653,
+    60,
+    299654,
+    59,
+    299655,
+    59,
+    299656,
+    58,
+    299657,
+    57,
+    299666,
+    55,
+    299670,
+    54,
+    299672,
+    58,
+    299674,
+    55,
+    299685,
+    52,
+    299687,
+    51,
+    299689,
+    57,
+    299693,
+    52,
+    299702,
+    54,
+    299703,
+    51,
+    299704,
+    56,
+    299705,
+    56,
+    299706,
+    53,
+    299709,
+    50,
+    299710,
+    53,
+    299711,
+    50,
+    299904,
+    61,
+    299906,
+    61,
+    299912,
+    58,
+    299922,
+    55,
+    299928,
+    58,
+    299930,
+    55,
+    301697,
+    60,
+    301701,
+    60,
+    301705,
+    57,
+    301733,
+    52,
+    301737,
+    57,
+    301741,
+    52,
+    301952,
+    79,
+    301953,
+    79,
+    301960,
+    76,
+    301961,
+    76,
+    316038,
+    59,
+    316039,
+    59,
+    316054,
+    54,
+    316071,
+    51,
+    316086,
+    54,
+    316087,
+    51,
+    316290,
+    78,
+    316294,
+    78,
+    316306,
+    73,
+    316310,
+    73,
+    318085,
+    77,
+    318087,
+    77,
+    318117,
+    70,
+    318119,
+    70,
+    318336,
+    79,
+    318337,
+    79,
+    318338,
+    78,
+    318341,
+    77,
+    318342,
+    78,
+    318343,
+    77,
+    430776,
+    56,
+    430777,
+    56,
+    430778,
+    53,
+    430781,
+    50,
+    430782,
+    53,
+    430783,
+    50,
+    431000,
+    75,
+    431002,
+    72,
+    431032,
+    75,
+    431034,
+    72,
+    432809,
+    74,
+    432813,
+    69,
+    432825,
+    74,
+    432829,
+    69,
+    433032,
+    76,
+    433033,
+    76,
+    433048,
+    75,
+    433065,
+    74,
+    433080,
+    75,
+    433081,
+    74,
+    447158,
+    71,
+    447159,
+    68,
+    447166,
+    71,
+    447167,
+    68,
+    447378,
+    73,
+    447382,
+    73,
+    447386,
+    72,
+    447414,
+    71,
+    447418,
+    72,
+    447422,
+    71,
+    449189,
+    70,
+    449191,
+    70,
+    449197,
+    69,
+    449207,
+    68,
+    449213,
+    69,
+    449215,
+    68,
+    449408,
+    67,
+    449409,
+    67,
+    449410,
+    66,
+    449413,
+    64,
+    449414,
+    66,
+    449415,
+    64,
+    449416,
+    67,
+    449417,
+    67,
+    449426,
+    66,
+    449430,
+    66,
+    449432,
+    65,
+    449434,
+    65,
+    449445,
+    64,
+    449447,
+    64,
+    449449,
+    63,
+    449453,
+    63,
+    449462,
+    62,
+    449463,
+    62,
+    449464,
+    65,
+    449465,
+    63,
+    449466,
+    65,
+    449469,
+    63,
+    449470,
+    62,
+    449471,
+    62,
+    449472,
+    19,
+    449473,
+    19,
+    449474,
+    18,
+    449477,
+    16,
+    449478,
+    18,
+    449479,
+    16,
+    449480,
+    19,
+    449481,
+    19,
+    449490,
+    18,
+    449494,
+    18,
+    449496,
+    17,
+    449498,
+    17,
+    449509,
+    16,
+    449511,
+    16,
+    449513,
+    15,
+    449517,
+    15,
+    449526,
+    14,
+    449527,
+    14,
+    449528,
+    17,
+    449529,
+    15,
+    449530,
+    17,
+    449533,
+    15,
+    449534,
+    14,
+    449535,
+    14,
+    449728,
+    19,
+    449729,
+    19,
+    449730,
+    18,
+    449734,
+    18,
+    449736,
+    19,
+    449737,
+    19,
+    449746,
+    18,
+    449750,
+    18,
+    449752,
+    17,
+    449754,
+    17,
+    449784,
+    17,
+    449786,
+    17,
+    451520,
+    19,
+    451521,
+    19,
+    451525,
+    16,
+    451527,
+    16,
+    451528,
+    19,
+    451529,
+    19,
+    451557,
+    16,
+    451559,
+    16,
+    451561,
+    15,
+    451565,
+    15,
+    451577,
+    15,
+    451581,
+    15,
+    451776,
+    19,
+    451777,
+    19,
+    451784,
+    19,
+    451785,
+    19,
+    465858,
+    18,
+    465861,
+    16,
+    465862,
+    18,
+    465863,
+    16,
+    465874,
+    18,
+    465878,
+    18,
+    465893,
+    16,
+    465895,
+    16,
+    465910,
+    14,
+    465911,
+    14,
+    465918,
+    14,
+    465919,
+    14,
+    466114,
+    18,
+    466118,
+    18,
+    466130,
+    18,
+    466134,
+    18,
+    467909,
+    16,
+    467911,
+    16,
+    467941,
+    16,
+    467943,
+    16,
+    468160,
+    13,
+    468161,
+    13,
+    468162,
+    13,
+    468163,
+    13,
+    468164,
+    13,
+    468165,
+    13,
+    468166,
+    13,
+    468167,
+    13,
+    580568,
+    17,
+    580570,
+    17,
+    580585,
+    15,
+    580589,
+    15,
+    580598,
+    14,
+    580599,
+    14,
+    580600,
+    17,
+    580601,
+    15,
+    580602,
+    17,
+    580605,
+    15,
+    580606,
+    14,
+    580607,
+    14,
+    580824,
+    17,
+    580826,
+    17,
+    580856,
+    17,
+    580858,
+    17,
+    582633,
+    15,
+    582637,
+    15,
+    582649,
+    15,
+    582653,
+    15,
+    582856,
+    12,
+    582857,
+    12,
+    582872,
+    12,
+    582873,
+    12,
+    582888,
+    12,
+    582889,
+    12,
+    582904,
+    12,
+    582905,
+    12,
+    596982,
+    14,
+    596983,
+    14,
+    596990,
+    14,
+    596991,
+    14,
+    597202,
+    11,
+    597206,
+    11,
+    597210,
+    11,
+    597214,
+    11,
+    597234,
+    11,
+    597238,
+    11,
+    597242,
+    11,
+    597246,
+    11,
+    599013,
+    10,
+    599015,
+    10,
+    599021,
+    10,
+    599023,
+    10,
+    599029,
+    10,
+    599031,
+    10,
+    599037,
+    10,
+    599039,
+    10,
+    599232,
+    13,
+    599233,
+    13,
+    599234,
+    13,
+    599235,
+    13,
+    599236,
+    13,
+    599237,
+    13,
+    599238,
+    13,
+    599239,
+    13,
+    599240,
+    12,
+    599241,
+    12,
+    599250,
+    11,
+    599254,
+    11,
+    599256,
+    12,
+    599257,
+    12,
+    599258,
+    11,
+    599262,
+    11,
+    599269,
+    10,
+    599271,
+    10,
+    599272,
+    12,
+    599273,
+    12,
+    599277,
+    10,
+    599279,
+    10,
+    599282,
+    11,
+    599285,
+    10,
+    599286,
+    11,
+    599287,
+    10,
+    599288,
+    12,
+    599289,
+    12,
+    599290,
+    11,
+    599293,
+    10,
+    599294,
+    11,
+    599295,
+    10
 ];
-exports.p2D = [0, 0, 1, -1, 0, 0, -1, 1, 0, 2, 1, 1, 1, 2, 2, 0, 1, 2, 0, 2, 1, 0, 0, 0];
+exports.p2D = [
+    0,
+    0,
+    1,
+    -1,
+    0,
+    0,
+    -1,
+    1,
+    0,
+    2,
+    1,
+    1,
+    1,
+    2,
+    2,
+    0,
+    1,
+    2,
+    0,
+    2,
+    1,
+    0,
+    0,
+    0
+];
 exports.p3D = [
-    0, 0, 1, -1, 0, 0, 1, 0, -1, 0, 0, -1, 1, 0, 0, 0, 1, -1, 0, 0, -1, 0, 1, 0, 0, -1, 1, 0, 2, 1, 1, 0, 1, 1, 1, -1, 0,
-    2, 1, 0, 1, 1, 1, -1, 1, 0, 2, 0, 1, 1, 1, -1, 1, 1, 1, 3, 2, 1, 0, 3, 1, 2, 0, 1, 3, 2, 0, 1, 3, 1, 0, 2, 1, 3, 0, 2,
-    1, 3, 0, 1, 2, 1, 1, 1, 0, 0, 2, 2, 0, 0, 1, 1, 0, 1, 0, 2, 0, 2, 0, 1, 1, 0, 0, 1, 2, 0, 0, 2, 2, 0, 0, 0, 0, 1, 1,
-    -1, 1, 2, 0, 0, 0, 0, 1, -1, 1, 1, 2, 0, 0, 0, 0, 1, 1, 1, -1, 2, 3, 1, 1, 1, 2, 0, 0, 2, 2, 3, 1, 1, 1, 2, 2, 0, 0,
-    2, 3, 1, 1, 1, 2, 0, 2, 0, 2, 1, 1, -1, 1, 2, 0, 0, 2, 2, 1, 1, -1, 1, 2, 2, 0, 0, 2, 1, -1, 1, 1, 2, 0, 0, 2, 2, 1,
-    -1, 1, 1, 2, 0, 2, 0, 2, 1, 1, 1, -1, 2, 2, 0, 0, 2, 1, 1, 1, -1, 2, 0, 2, 0
+    0,
+    0,
+    1,
+    -1,
+    0,
+    0,
+    1,
+    0,
+    -1,
+    0,
+    0,
+    -1,
+    1,
+    0,
+    0,
+    0,
+    1,
+    -1,
+    0,
+    0,
+    -1,
+    0,
+    1,
+    0,
+    0,
+    -1,
+    1,
+    0,
+    2,
+    1,
+    1,
+    0,
+    1,
+    1,
+    1,
+    -1,
+    0,
+    2,
+    1,
+    0,
+    1,
+    1,
+    1,
+    -1,
+    1,
+    0,
+    2,
+    0,
+    1,
+    1,
+    1,
+    -1,
+    1,
+    1,
+    1,
+    3,
+    2,
+    1,
+    0,
+    3,
+    1,
+    2,
+    0,
+    1,
+    3,
+    2,
+    0,
+    1,
+    3,
+    1,
+    0,
+    2,
+    1,
+    3,
+    0,
+    2,
+    1,
+    3,
+    0,
+    1,
+    2,
+    1,
+    1,
+    1,
+    0,
+    0,
+    2,
+    2,
+    0,
+    0,
+    1,
+    1,
+    0,
+    1,
+    0,
+    2,
+    0,
+    2,
+    0,
+    1,
+    1,
+    0,
+    0,
+    1,
+    2,
+    0,
+    0,
+    2,
+    2,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    -1,
+    1,
+    2,
+    0,
+    0,
+    0,
+    0,
+    1,
+    -1,
+    1,
+    1,
+    2,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    -1,
+    2,
+    3,
+    1,
+    1,
+    1,
+    2,
+    0,
+    0,
+    2,
+    2,
+    3,
+    1,
+    1,
+    1,
+    2,
+    2,
+    0,
+    0,
+    2,
+    3,
+    1,
+    1,
+    1,
+    2,
+    0,
+    2,
+    0,
+    2,
+    1,
+    1,
+    -1,
+    1,
+    2,
+    0,
+    0,
+    2,
+    2,
+    1,
+    1,
+    -1,
+    1,
+    2,
+    2,
+    0,
+    0,
+    2,
+    1,
+    -1,
+    1,
+    1,
+    2,
+    0,
+    0,
+    2,
+    2,
+    1,
+    -1,
+    1,
+    1,
+    2,
+    0,
+    2,
+    0,
+    2,
+    1,
+    1,
+    1,
+    -1,
+    2,
+    2,
+    0,
+    0,
+    2,
+    1,
+    1,
+    1,
+    -1,
+    2,
+    0,
+    2,
+    0
 ];
 exports.p4D = [
-    0, 0, 1, -1, 0, 0, 0, 1, 0, -1, 0, 0, 1, 0, 0, -1, 0, 0, -1, 1, 0, 0, 0, 0, 1, -1, 0, 0, 0, 1, 0, -1, 0, 0, -1, 0, 1,
-    0, 0, 0, -1, 1, 0, 0, 0, 0, 1, -1, 0, 0, -1, 0, 0, 1, 0, 0, -1, 0, 1, 0, 0, 0, -1, 1, 0, 2, 1, 1, 0, 0, 1, 1, 1, -1,
-    0, 1, 1, 1, 0, -1, 0, 2, 1, 0, 1, 0, 1, 1, -1, 1, 0, 1, 1, 0, 1, -1, 0, 2, 0, 1, 1, 0, 1, -1, 1, 1, 0, 1, 0, 1, 1, -1,
-    0, 2, 1, 0, 0, 1, 1, 1, -1, 0, 1, 1, 1, 0, -1, 1, 0, 2, 0, 1, 0, 1, 1, -1, 1, 0, 1, 1, 0, 1, -1, 1, 0, 2, 0, 0, 1, 1,
-    1, -1, 0, 1, 1, 1, 0, -1, 1, 1, 1, 4, 2, 1, 1, 0, 4, 1, 2, 1, 0, 4, 1, 1, 2, 0, 1, 4, 2, 1, 0, 1, 4, 1, 2, 0, 1, 4, 1,
-    1, 0, 2, 1, 4, 2, 0, 1, 1, 4, 1, 0, 2, 1, 4, 1, 0, 1, 2, 1, 4, 0, 2, 1, 1, 4, 0, 1, 2, 1, 4, 0, 1, 1, 2, 1, 2, 1, 1,
-    0, 0, 3, 2, 1, 0, 0, 3, 1, 2, 0, 0, 1, 2, 1, 0, 1, 0, 3, 2, 0, 1, 0, 3, 1, 0, 2, 0, 1, 2, 0, 1, 1, 0, 3, 0, 2, 1, 0,
-    3, 0, 1, 2, 0, 1, 2, 1, 0, 0, 1, 3, 2, 0, 0, 1, 3, 1, 0, 0, 2, 1, 2, 0, 1, 0, 1, 3, 0, 2, 0, 1, 3, 0, 1, 0, 2, 1, 2,
-    0, 0, 1, 1, 3, 0, 0, 2, 1, 3, 0, 0, 1, 2, 2, 3, 1, 1, 1, 0, 2, 1, 1, 1, -1, 2, 2, 0, 0, 0, 2, 3, 1, 1, 0, 1, 2, 1, 1,
-    -1, 1, 2, 2, 0, 0, 0, 2, 3, 1, 0, 1, 1, 2, 1, -1, 1, 1, 2, 2, 0, 0, 0, 2, 3, 1, 1, 1, 0, 2, 1, 1, 1, -1, 2, 0, 2, 0,
-    0, 2, 3, 1, 1, 0, 1, 2, 1, 1, -1, 1, 2, 0, 2, 0, 0, 2, 3, 0, 1, 1, 1, 2, -1, 1, 1, 1, 2, 0, 2, 0, 0, 2, 3, 1, 1, 1, 0,
-    2, 1, 1, 1, -1, 2, 0, 0, 2, 0, 2, 3, 1, 0, 1, 1, 2, 1, -1, 1, 1, 2, 0, 0, 2, 0, 2, 3, 0, 1, 1, 1, 2, -1, 1, 1, 1, 2,
-    0, 0, 2, 0, 2, 3, 1, 1, 0, 1, 2, 1, 1, -1, 1, 2, 0, 0, 0, 2, 2, 3, 1, 0, 1, 1, 2, 1, -1, 1, 1, 2, 0, 0, 0, 2, 2, 3, 0,
-    1, 1, 1, 2, -1, 1, 1, 1, 2, 0, 0, 0, 2, 2, 1, 1, 1, -1, 0, 1, 1, 1, 0, -1, 0, 0, 0, 0, 0, 2, 1, 1, -1, 1, 0, 1, 1, 0,
-    1, -1, 0, 0, 0, 0, 0, 2, 1, -1, 1, 1, 0, 1, 0, 1, 1, -1, 0, 0, 0, 0, 0, 2, 1, 1, -1, 0, 1, 1, 1, 0, -1, 1, 0, 0, 0, 0,
-    0, 2, 1, -1, 1, 0, 1, 1, 0, 1, -1, 1, 0, 0, 0, 0, 0, 2, 1, -1, 0, 1, 1, 1, 0, -1, 1, 1, 0, 0, 0, 0, 0, 2, 1, 1, 1, -1,
-    0, 1, 1, 1, 0, -1, 2, 2, 0, 0, 0, 2, 1, 1, -1, 1, 0, 1, 1, 0, 1, -1, 2, 2, 0, 0, 0, 2, 1, 1, -1, 0, 1, 1, 1, 0, -1, 1,
-    2, 2, 0, 0, 0, 2, 1, 1, 1, -1, 0, 1, 1, 1, 0, -1, 2, 0, 2, 0, 0, 2, 1, -1, 1, 1, 0, 1, 0, 1, 1, -1, 2, 0, 2, 0, 0, 2,
-    1, -1, 1, 0, 1, 1, 0, 1, -1, 1, 2, 0, 2, 0, 0, 2, 1, 1, -1, 1, 0, 1, 1, 0, 1, -1, 2, 0, 0, 2, 0, 2, 1, -1, 1, 1, 0, 1,
-    0, 1, 1, -1, 2, 0, 0, 2, 0, 2, 1, -1, 0, 1, 1, 1, 0, -1, 1, 1, 2, 0, 0, 2, 0, 2, 1, 1, -1, 0, 1, 1, 1, 0, -1, 1, 2, 0,
-    0, 0, 2, 2, 1, -1, 1, 0, 1, 1, 0, 1, -1, 1, 2, 0, 0, 0, 2, 2, 1, -1, 0, 1, 1, 1, 0, -1, 1, 1, 2, 0, 0, 0, 2, 3, 1, 1,
-    0, 0, 0, 2, 2, 0, 0, 0, 2, 1, 1, 1, -1, 3, 1, 0, 1, 0, 0, 2, 0, 2, 0, 0, 2, 1, 1, 1, -1, 3, 1, 0, 0, 1, 0, 2, 0, 0, 2,
-    0, 2, 1, 1, 1, -1, 3, 1, 1, 0, 0, 0, 2, 2, 0, 0, 0, 2, 1, 1, -1, 1, 3, 1, 0, 1, 0, 0, 2, 0, 2, 0, 0, 2, 1, 1, -1, 1,
-    3, 1, 0, 0, 0, 1, 2, 0, 0, 0, 2, 2, 1, 1, -1, 1, 3, 1, 1, 0, 0, 0, 2, 2, 0, 0, 0, 2, 1, -1, 1, 1, 3, 1, 0, 0, 1, 0, 2,
-    0, 0, 2, 0, 2, 1, -1, 1, 1, 3, 1, 0, 0, 0, 1, 2, 0, 0, 0, 2, 2, 1, -1, 1, 1, 3, 1, 0, 1, 0, 0, 2, 0, 2, 0, 0, 2, -1,
-    1, 1, 1, 3, 1, 0, 0, 1, 0, 2, 0, 0, 2, 0, 2, -1, 1, 1, 1, 3, 1, 0, 0, 0, 1, 2, 0, 0, 0, 2, 2, -1, 1, 1, 1, 3, 3, 2, 1,
-    0, 0, 3, 1, 2, 0, 0, 4, 1, 1, 1, 1, 3, 3, 2, 0, 1, 0, 3, 1, 0, 2, 0, 4, 1, 1, 1, 1, 3, 3, 0, 2, 1, 0, 3, 0, 1, 2, 0,
-    4, 1, 1, 1, 1, 3, 3, 2, 0, 0, 1, 3, 1, 0, 0, 2, 4, 1, 1, 1, 1, 3, 3, 0, 2, 0, 1, 3, 0, 1, 0, 2, 4, 1, 1, 1, 1, 3, 3,
-    0, 0, 2, 1, 3, 0, 0, 1, 2, 4, 1, 1, 1, 1, 3, 3, 2, 1, 0, 0, 3, 1, 2, 0, 0, 2, 1, 1, 1, -1, 3, 3, 2, 0, 1, 0, 3, 1, 0,
-    2, 0, 2, 1, 1, 1, -1, 3, 3, 0, 2, 1, 0, 3, 0, 1, 2, 0, 2, 1, 1, 1, -1, 3, 3, 2, 1, 0, 0, 3, 1, 2, 0, 0, 2, 1, 1, -1,
-    1, 3, 3, 2, 0, 0, 1, 3, 1, 0, 0, 2, 2, 1, 1, -1, 1, 3, 3, 0, 2, 0, 1, 3, 0, 1, 0, 2, 2, 1, 1, -1, 1, 3, 3, 2, 0, 1, 0,
-    3, 1, 0, 2, 0, 2, 1, -1, 1, 1, 3, 3, 2, 0, 0, 1, 3, 1, 0, 0, 2, 2, 1, -1, 1, 1, 3, 3, 0, 0, 2, 1, 3, 0, 0, 1, 2, 2,
-    1, -1, 1, 1, 3, 3, 0, 2, 1, 0, 3, 0, 1, 2, 0, 2, -1, 1, 1, 1, 3, 3, 0, 2, 0, 1, 3, 0, 1, 0, 2, 2, -1, 1, 1, 1, 3, 3,
-    0, 0, 2, 1, 3, 0, 0, 1, 2, 2, -1, 1, 1, 1
+    0,
+    0,
+    1,
+    -1,
+    0,
+    0,
+    0,
+    1,
+    0,
+    -1,
+    0,
+    0,
+    1,
+    0,
+    0,
+    -1,
+    0,
+    0,
+    -1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    -1,
+    0,
+    0,
+    0,
+    1,
+    0,
+    -1,
+    0,
+    0,
+    -1,
+    0,
+    1,
+    0,
+    0,
+    0,
+    -1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    -1,
+    0,
+    0,
+    -1,
+    0,
+    0,
+    1,
+    0,
+    0,
+    -1,
+    0,
+    1,
+    0,
+    0,
+    0,
+    -1,
+    1,
+    0,
+    2,
+    1,
+    1,
+    0,
+    0,
+    1,
+    1,
+    1,
+    -1,
+    0,
+    1,
+    1,
+    1,
+    0,
+    -1,
+    0,
+    2,
+    1,
+    0,
+    1,
+    0,
+    1,
+    1,
+    -1,
+    1,
+    0,
+    1,
+    1,
+    0,
+    1,
+    -1,
+    0,
+    2,
+    0,
+    1,
+    1,
+    0,
+    1,
+    -1,
+    1,
+    1,
+    0,
+    1,
+    0,
+    1,
+    1,
+    -1,
+    0,
+    2,
+    1,
+    0,
+    0,
+    1,
+    1,
+    1,
+    -1,
+    0,
+    1,
+    1,
+    1,
+    0,
+    -1,
+    1,
+    0,
+    2,
+    0,
+    1,
+    0,
+    1,
+    1,
+    -1,
+    1,
+    0,
+    1,
+    1,
+    0,
+    1,
+    -1,
+    1,
+    0,
+    2,
+    0,
+    0,
+    1,
+    1,
+    1,
+    -1,
+    0,
+    1,
+    1,
+    1,
+    0,
+    -1,
+    1,
+    1,
+    1,
+    4,
+    2,
+    1,
+    1,
+    0,
+    4,
+    1,
+    2,
+    1,
+    0,
+    4,
+    1,
+    1,
+    2,
+    0,
+    1,
+    4,
+    2,
+    1,
+    0,
+    1,
+    4,
+    1,
+    2,
+    0,
+    1,
+    4,
+    1,
+    1,
+    0,
+    2,
+    1,
+    4,
+    2,
+    0,
+    1,
+    1,
+    4,
+    1,
+    0,
+    2,
+    1,
+    4,
+    1,
+    0,
+    1,
+    2,
+    1,
+    4,
+    0,
+    2,
+    1,
+    1,
+    4,
+    0,
+    1,
+    2,
+    1,
+    4,
+    0,
+    1,
+    1,
+    2,
+    1,
+    2,
+    1,
+    1,
+    0,
+    0,
+    3,
+    2,
+    1,
+    0,
+    0,
+    3,
+    1,
+    2,
+    0,
+    0,
+    1,
+    2,
+    1,
+    0,
+    1,
+    0,
+    3,
+    2,
+    0,
+    1,
+    0,
+    3,
+    1,
+    0,
+    2,
+    0,
+    1,
+    2,
+    0,
+    1,
+    1,
+    0,
+    3,
+    0,
+    2,
+    1,
+    0,
+    3,
+    0,
+    1,
+    2,
+    0,
+    1,
+    2,
+    1,
+    0,
+    0,
+    1,
+    3,
+    2,
+    0,
+    0,
+    1,
+    3,
+    1,
+    0,
+    0,
+    2,
+    1,
+    2,
+    0,
+    1,
+    0,
+    1,
+    3,
+    0,
+    2,
+    0,
+    1,
+    3,
+    0,
+    1,
+    0,
+    2,
+    1,
+    2,
+    0,
+    0,
+    1,
+    1,
+    3,
+    0,
+    0,
+    2,
+    1,
+    3,
+    0,
+    0,
+    1,
+    2,
+    2,
+    3,
+    1,
+    1,
+    1,
+    0,
+    2,
+    1,
+    1,
+    1,
+    -1,
+    2,
+    2,
+    0,
+    0,
+    0,
+    2,
+    3,
+    1,
+    1,
+    0,
+    1,
+    2,
+    1,
+    1,
+    -1,
+    1,
+    2,
+    2,
+    0,
+    0,
+    0,
+    2,
+    3,
+    1,
+    0,
+    1,
+    1,
+    2,
+    1,
+    -1,
+    1,
+    1,
+    2,
+    2,
+    0,
+    0,
+    0,
+    2,
+    3,
+    1,
+    1,
+    1,
+    0,
+    2,
+    1,
+    1,
+    1,
+    -1,
+    2,
+    0,
+    2,
+    0,
+    0,
+    2,
+    3,
+    1,
+    1,
+    0,
+    1,
+    2,
+    1,
+    1,
+    -1,
+    1,
+    2,
+    0,
+    2,
+    0,
+    0,
+    2,
+    3,
+    0,
+    1,
+    1,
+    1,
+    2,
+    -1,
+    1,
+    1,
+    1,
+    2,
+    0,
+    2,
+    0,
+    0,
+    2,
+    3,
+    1,
+    1,
+    1,
+    0,
+    2,
+    1,
+    1,
+    1,
+    -1,
+    2,
+    0,
+    0,
+    2,
+    0,
+    2,
+    3,
+    1,
+    0,
+    1,
+    1,
+    2,
+    1,
+    -1,
+    1,
+    1,
+    2,
+    0,
+    0,
+    2,
+    0,
+    2,
+    3,
+    0,
+    1,
+    1,
+    1,
+    2,
+    -1,
+    1,
+    1,
+    1,
+    2,
+    0,
+    0,
+    2,
+    0,
+    2,
+    3,
+    1,
+    1,
+    0,
+    1,
+    2,
+    1,
+    1,
+    -1,
+    1,
+    2,
+    0,
+    0,
+    0,
+    2,
+    2,
+    3,
+    1,
+    0,
+    1,
+    1,
+    2,
+    1,
+    -1,
+    1,
+    1,
+    2,
+    0,
+    0,
+    0,
+    2,
+    2,
+    3,
+    0,
+    1,
+    1,
+    1,
+    2,
+    -1,
+    1,
+    1,
+    1,
+    2,
+    0,
+    0,
+    0,
+    2,
+    2,
+    1,
+    1,
+    1,
+    -1,
+    0,
+    1,
+    1,
+    1,
+    0,
+    -1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    2,
+    1,
+    1,
+    -1,
+    1,
+    0,
+    1,
+    1,
+    0,
+    1,
+    -1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    2,
+    1,
+    -1,
+    1,
+    1,
+    0,
+    1,
+    0,
+    1,
+    1,
+    -1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    2,
+    1,
+    1,
+    -1,
+    0,
+    1,
+    1,
+    1,
+    0,
+    -1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    2,
+    1,
+    -1,
+    1,
+    0,
+    1,
+    1,
+    0,
+    1,
+    -1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    2,
+    1,
+    -1,
+    0,
+    1,
+    1,
+    1,
+    0,
+    -1,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    2,
+    1,
+    1,
+    1,
+    -1,
+    0,
+    1,
+    1,
+    1,
+    0,
+    -1,
+    2,
+    2,
+    0,
+    0,
+    0,
+    2,
+    1,
+    1,
+    -1,
+    1,
+    0,
+    1,
+    1,
+    0,
+    1,
+    -1,
+    2,
+    2,
+    0,
+    0,
+    0,
+    2,
+    1,
+    1,
+    -1,
+    0,
+    1,
+    1,
+    1,
+    0,
+    -1,
+    1,
+    2,
+    2,
+    0,
+    0,
+    0,
+    2,
+    1,
+    1,
+    1,
+    -1,
+    0,
+    1,
+    1,
+    1,
+    0,
+    -1,
+    2,
+    0,
+    2,
+    0,
+    0,
+    2,
+    1,
+    -1,
+    1,
+    1,
+    0,
+    1,
+    0,
+    1,
+    1,
+    -1,
+    2,
+    0,
+    2,
+    0,
+    0,
+    2,
+    1,
+    -1,
+    1,
+    0,
+    1,
+    1,
+    0,
+    1,
+    -1,
+    1,
+    2,
+    0,
+    2,
+    0,
+    0,
+    2,
+    1,
+    1,
+    -1,
+    1,
+    0,
+    1,
+    1,
+    0,
+    1,
+    -1,
+    2,
+    0,
+    0,
+    2,
+    0,
+    2,
+    1,
+    -1,
+    1,
+    1,
+    0,
+    1,
+    0,
+    1,
+    1,
+    -1,
+    2,
+    0,
+    0,
+    2,
+    0,
+    2,
+    1,
+    -1,
+    0,
+    1,
+    1,
+    1,
+    0,
+    -1,
+    1,
+    1,
+    2,
+    0,
+    0,
+    2,
+    0,
+    2,
+    1,
+    1,
+    -1,
+    0,
+    1,
+    1,
+    1,
+    0,
+    -1,
+    1,
+    2,
+    0,
+    0,
+    0,
+    2,
+    2,
+    1,
+    -1,
+    1,
+    0,
+    1,
+    1,
+    0,
+    1,
+    -1,
+    1,
+    2,
+    0,
+    0,
+    0,
+    2,
+    2,
+    1,
+    -1,
+    0,
+    1,
+    1,
+    1,
+    0,
+    -1,
+    1,
+    1,
+    2,
+    0,
+    0,
+    0,
+    2,
+    3,
+    1,
+    1,
+    0,
+    0,
+    0,
+    2,
+    2,
+    0,
+    0,
+    0,
+    2,
+    1,
+    1,
+    1,
+    -1,
+    3,
+    1,
+    0,
+    1,
+    0,
+    0,
+    2,
+    0,
+    2,
+    0,
+    0,
+    2,
+    1,
+    1,
+    1,
+    -1,
+    3,
+    1,
+    0,
+    0,
+    1,
+    0,
+    2,
+    0,
+    0,
+    2,
+    0,
+    2,
+    1,
+    1,
+    1,
+    -1,
+    3,
+    1,
+    1,
+    0,
+    0,
+    0,
+    2,
+    2,
+    0,
+    0,
+    0,
+    2,
+    1,
+    1,
+    -1,
+    1,
+    3,
+    1,
+    0,
+    1,
+    0,
+    0,
+    2,
+    0,
+    2,
+    0,
+    0,
+    2,
+    1,
+    1,
+    -1,
+    1,
+    3,
+    1,
+    0,
+    0,
+    0,
+    1,
+    2,
+    0,
+    0,
+    0,
+    2,
+    2,
+    1,
+    1,
+    -1,
+    1,
+    3,
+    1,
+    1,
+    0,
+    0,
+    0,
+    2,
+    2,
+    0,
+    0,
+    0,
+    2,
+    1,
+    -1,
+    1,
+    1,
+    3,
+    1,
+    0,
+    0,
+    1,
+    0,
+    2,
+    0,
+    0,
+    2,
+    0,
+    2,
+    1,
+    -1,
+    1,
+    1,
+    3,
+    1,
+    0,
+    0,
+    0,
+    1,
+    2,
+    0,
+    0,
+    0,
+    2,
+    2,
+    1,
+    -1,
+    1,
+    1,
+    3,
+    1,
+    0,
+    1,
+    0,
+    0,
+    2,
+    0,
+    2,
+    0,
+    0,
+    2,
+    -1,
+    1,
+    1,
+    1,
+    3,
+    1,
+    0,
+    0,
+    1,
+    0,
+    2,
+    0,
+    0,
+    2,
+    0,
+    2,
+    -1,
+    1,
+    1,
+    1,
+    3,
+    1,
+    0,
+    0,
+    0,
+    1,
+    2,
+    0,
+    0,
+    0,
+    2,
+    2,
+    -1,
+    1,
+    1,
+    1,
+    3,
+    3,
+    2,
+    1,
+    0,
+    0,
+    3,
+    1,
+    2,
+    0,
+    0,
+    4,
+    1,
+    1,
+    1,
+    1,
+    3,
+    3,
+    2,
+    0,
+    1,
+    0,
+    3,
+    1,
+    0,
+    2,
+    0,
+    4,
+    1,
+    1,
+    1,
+    1,
+    3,
+    3,
+    0,
+    2,
+    1,
+    0,
+    3,
+    0,
+    1,
+    2,
+    0,
+    4,
+    1,
+    1,
+    1,
+    1,
+    3,
+    3,
+    2,
+    0,
+    0,
+    1,
+    3,
+    1,
+    0,
+    0,
+    2,
+    4,
+    1,
+    1,
+    1,
+    1,
+    3,
+    3,
+    0,
+    2,
+    0,
+    1,
+    3,
+    0,
+    1,
+    0,
+    2,
+    4,
+    1,
+    1,
+    1,
+    1,
+    3,
+    3,
+    0,
+    0,
+    2,
+    1,
+    3,
+    0,
+    0,
+    1,
+    2,
+    4,
+    1,
+    1,
+    1,
+    1,
+    3,
+    3,
+    2,
+    1,
+    0,
+    0,
+    3,
+    1,
+    2,
+    0,
+    0,
+    2,
+    1,
+    1,
+    1,
+    -1,
+    3,
+    3,
+    2,
+    0,
+    1,
+    0,
+    3,
+    1,
+    0,
+    2,
+    0,
+    2,
+    1,
+    1,
+    1,
+    -1,
+    3,
+    3,
+    0,
+    2,
+    1,
+    0,
+    3,
+    0,
+    1,
+    2,
+    0,
+    2,
+    1,
+    1,
+    1,
+    -1,
+    3,
+    3,
+    2,
+    1,
+    0,
+    0,
+    3,
+    1,
+    2,
+    0,
+    0,
+    2,
+    1,
+    1,
+    -1,
+    1,
+    3,
+    3,
+    2,
+    0,
+    0,
+    1,
+    3,
+    1,
+    0,
+    0,
+    2,
+    2,
+    1,
+    1,
+    -1,
+    1,
+    3,
+    3,
+    0,
+    2,
+    0,
+    1,
+    3,
+    0,
+    1,
+    0,
+    2,
+    2,
+    1,
+    1,
+    -1,
+    1,
+    3,
+    3,
+    2,
+    0,
+    1,
+    0,
+    3,
+    1,
+    0,
+    2,
+    0,
+    2,
+    1,
+    -1,
+    1,
+    1,
+    3,
+    3,
+    2,
+    0,
+    0,
+    1,
+    3,
+    1,
+    0,
+    0,
+    2,
+    2,
+    1,
+    -1,
+    1,
+    1,
+    3,
+    3,
+    0,
+    0,
+    2,
+    1,
+    3,
+    0,
+    0,
+    1,
+    2,
+    2,
+    1,
+    -1,
+    1,
+    1,
+    3,
+    3,
+    0,
+    2,
+    1,
+    0,
+    3,
+    0,
+    1,
+    2,
+    0,
+    2,
+    -1,
+    1,
+    1,
+    1,
+    3,
+    3,
+    0,
+    2,
+    0,
+    1,
+    3,
+    0,
+    1,
+    0,
+    2,
+    2,
+    -1,
+    1,
+    1,
+    1,
+    3,
+    3,
+    0,
+    0,
+    2,
+    1,
+    3,
+    0,
+    0,
+    1,
+    2,
+    2,
+    -1,
+    1,
+    1,
+    1
 ];
 
 
@@ -18211,7 +21484,16 @@ exports.p4D = [
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var TWO_PI = 2 * Math.PI;
+function processOptions(options) {
+    return {
+        amplitude: typeof options.amplitude === "number" ? options.amplitude : 1.0,
+        frequency: typeof options.frequency === "number" ? options.frequency : 1.0,
+        octaves: typeof options.octaves === "number" ? Math.floor(options.octaves) : 1,
+        persistence: typeof options.persistence === "number" ? options.persistence : 0.5
+    };
+}
 function makeCuboid(width, height, depth, noise3, options) {
     if (options === void 0) { options = {}; }
     var _a = processOptions(options), amplitude = _a.amplitude, frequency = _a.frequency, octaves = _a.octaves, persistence = _a.persistence;
@@ -18224,9 +21506,11 @@ function makeCuboid(width, height, depth, noise3, options) {
                 var value = 0.0;
                 for (var octave = 0; octave < octaves; octave++) {
                     var freq = frequency * Math.pow(2, octave);
-                    value += noise3(x * freq, y * freq, z * freq) * (amplitude * Math.pow(persistence, octave));
+                    value +=
+                        noise3(x * freq, y * freq, z * freq) *
+                            (amplitude * Math.pow(persistence, octave));
                 }
-                field[x][y][z] = value / (2 - (1 / Math.pow(2, octaves - 1)));
+                field[x][y][z] = value / (2 - 1 / Math.pow(2, octaves - 1));
             }
         }
     }
@@ -18247,9 +21531,11 @@ function makeCylinderSurface(circumference, height, noise3, options) {
                 var nx = x / circumference;
                 var rdx = nx * TWO_PI;
                 var _b = [radius * Math.sin(rdx), radius * Math.cos(rdx)], a = _b[0], b = _b[1];
-                value += noise3(a * freq, b * freq, y * freq) * (amplitude * Math.pow(persistence, octave));
+                value +=
+                    noise3(a * freq, b * freq, y * freq) *
+                        (amplitude * Math.pow(persistence, octave));
             }
-            field[x][y] = value / (2 - (1 / Math.pow(2, octaves - 1)));
+            field[x][y] = value / (2 - 1 / Math.pow(2, octaves - 1));
         }
     }
     return field;
@@ -18265,7 +21551,7 @@ function makeLine(length, noise1, options) {
             var freq = frequency * Math.pow(2, octaves);
             value += noise1(x * freq) * (amplitude * Math.pow(persistence, octave));
         }
-        field[x] = value / (2 - (1 / Math.pow(2, octaves - 1)));
+        field[x] = value / (2 - 1 / Math.pow(2, octaves - 1));
     }
     return field;
 }
@@ -18280,9 +21566,11 @@ function makeRectangle(width, height, noise2, options) {
             var value = 0.0;
             for (var octave = 0; octave < octaves; octave++) {
                 var freq = frequency * Math.pow(2, octave);
-                value += noise2(x * freq, y * freq) * (amplitude * Math.pow(persistence, octave));
+                value +=
+                    noise2(x * freq, y * freq) *
+                        (amplitude * Math.pow(persistence, octave));
             }
-            field[x][y] = value / (2 - (1 / Math.pow(2, octaves - 1)));
+            field[x][y] = value / (2 - 1 / Math.pow(2, octaves - 1));
         }
     }
     return field;
@@ -18304,22 +21592,16 @@ function makeSphereSurface(circumference, noise3, options) {
                 var a = TWO_PI * Math.sin(rdx) * sinY;
                 var b = TWO_PI * Math.cos(rdx) * sinY;
                 var d = TWO_PI * Math.cos(rdy);
-                value += noise3(a * freq, b * freq, d * freq) * (amplitude * Math.pow(persistence, octave));
+                value +=
+                    noise3(a * freq, b * freq, d * freq) *
+                        (amplitude * Math.pow(persistence, octave));
             }
-            field[x][y] = value / (2 - (1 / Math.pow(2, octaves - 1)));
+            field[x][y] = value / (2 - 1 / Math.pow(2, octaves - 1));
         }
     }
     return field;
 }
 exports.makeSphereSurface = makeSphereSurface;
-function processOptions(options) {
-    return {
-        amplitude: typeof options.amplitude === 'number' ? options.amplitude : 1.0,
-        frequency: typeof options.frequency === 'number' ? options.frequency : 1.0,
-        octaves: typeof options.octaves === 'number' ? Math.floor(options.octaves) : 1,
-        persistence: typeof options.persistence === 'number' ? options.persistence : 0.5
-    };
-}
 
 
 /***/ }),
