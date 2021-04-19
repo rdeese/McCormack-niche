@@ -12,20 +12,21 @@ if (!process.env.WEBPACK) {
   fs = require('fs')
 }
 
-let VEL = 1
-let GESTATION = 5
-let NAG_SIZE = 1
+let VEL = 0.5
+let GESTATION = 2
+let NAG_SIZE = 0.5
 let USE_NICHE = true
 let NICHE_WIDTHS = [50, 100, 200]
-let NICHE_SPECIFICITY = 1000
+let NICHE_SPECIFICITY = 20
 let NICHE_AREA_SIZES = [40, 80, 160]
-let NICHE_AREA_SIZE = 30
+let NICHE_AREA_SIZE = 10
 let NUM_NAGS = 10
 let MUTATION_SEVERITIES = [0.1, 0.2]
-let MUTATION_SEVERITY = 0.1
+let MUTATION_SEVERITY = 0.3
 let REPETITIONS = 2
 let LOG_INTERVAL = 100
 let DEAD_NAGS = []
+let WORLD_TIME = 0
 
 let canvas
 
@@ -117,6 +118,7 @@ USE_NICHE: ${USE_NICHE}`
   let w = new World(context)
 
   let animate = () => {
+    WORLD_TIME = WORLD_TIME + 1
     w.step()
     if (w.nagList.length == 0) {
       setTimeout(1000)
@@ -124,6 +126,7 @@ USE_NICHE: ${USE_NICHE}`
       console.log("========== RESTART ===========")
       const topNags = _.sortBy(DEAD_NAGS, (nag) => -nag.age).slice(0, 10)
       console.log(topNags)
+      WORLD_TIME = 0
       w = new World(context, topNags)
     }
     requestAnimationFrame(animate)
@@ -164,14 +167,22 @@ World.prototype = {
 		this.nagList = []
 		for (let i = 0; i < NUM_NAGS; ++i) {
       const newNag = nags[i] || new Nag(
-        0, // curvature
-        0.5*Math.random(), // irrationality
-        0.1+0.3*Math.random(), // fecundity,
+        0.2 * Math.random() - 0.1, // curvature
+        0.2 * Math.random(), // irrationality
+        Math.random() * 0.1, // fecundity,
         0.01*Math.random(), // mortality
         2*Math.random()*Math.PI, // offset
-        0.2*Math.random(), // niche
+        Math.random() * 0.2, // niche
         { x: Math.random() * this.width, y: Math.random() * this.height }, // position
         Math.random()*Math.PI*2 // rotation
+        // 0, // curvature
+        // 0.5*Math.random(), // irrationality
+        // 0.1+0.3*Math.random(), // fecundity,
+        // 0.01*Math.random(), // mortality
+        // 2*Math.random()*Math.PI, // offset
+        // 0.2*Math.random(), // niche
+        // { x: Math.random() * this.width, y: Math.random() * this.height }, // position
+        // Math.random()*Math.PI*2 // rotation
       )
       newNag.x = Math.random() * this.width
       newNag.y = Math.random() * this.height
@@ -244,10 +255,10 @@ let Nag = function (curvature, irrationality, fecundity, mortality, offset, nich
 Nag.prototype = {
 	init: function (curvature, irrationality, fecundity, mortality, offset, niche, location, heading) {
 		// the genome
-		this.curvature = this.bound(curvature, -1, 1)
-		this.irrationality =  this.bound(irrationality, 0, 1)
-		this.fecundity =  this.bound(fecundity, 0, 1)
-		this.mortality =  this.bound(mortality, 0.001, 1)
+		this.curvature = this.bound(curvature, -0.2, 0.2)
+		this.irrationality =  this.bound(irrationality, 0, 0.2)
+		this.fecundity =  this.bound(fecundity, 0, 0.2)
+		this.mortality =  0.1 // this.bound(mortality, 0.001, 1)
 		this.offset = offset
     this.niche = this.bound(niche, 0, 1)
 		// end genome
@@ -274,13 +285,13 @@ Nag.prototype = {
 
   survive: function (deathProb, imgData) {
     if (this.outOfBounds()) {
-      console.log(`died age ${this.age}, out of bounds`)
-      return false
+      this.wrap()
+      // console.log(`died age ${this.age}, out of bounds`)
     } else if (Math.random() < deathProb) {
-      console.log(`died age ${this.age}, out of their niche`)
+      // console.log(`died age ${this.age}, out of their niche`)
       return false
     } else if (this.collision(imgData)) {
-      console.log(`died age ${this.age}, in a collision`)
+      // console.log(`died age ${this.age}, in a collision`)
       return false
 		}
 		this.age++
@@ -299,15 +310,15 @@ Nag.prototype = {
       let differenceFromPreference = Math.abs(this.localDensity(imgData) - this.niche)
       let nicheFactor = Math.pow(
         Math.cos(this.bound(
-          2*Math.PI*(differenceFromPreference),
+          Math.PI*(differenceFromPreference),
           -Math.PI/2,
           Math.PI/2
         )),
-        NICHE_SPECIFICITY
+        NICHE_SPECIFICITY * (WORLD_TIME / 500)
       )
       return {
         death: this.mortality * (1-nicheFactor),
-        reproduction: this.fecundity * nicheFactor
+        reproduction: this.fecundity
       }
     } else {
       return {
@@ -358,8 +369,13 @@ Nag.prototype = {
     return density
   },
 
+  wrap: function () {
+    this.x = (this.x + canvas.width) % canvas.width
+    this.y = (this.y + canvas.height) % canvas.height
+  },
+
 	outOfBounds: function () {
-		const out = (
+		return (
       this.x === NaN ||
       this.y === NaN ||
       this.x < 0 ||
@@ -367,20 +383,16 @@ Nag.prototype = {
       this.x >= canvas.width ||
       this.y >= canvas.height
     )
-    if (out) {
-      console.log(`nag at ${this.x}, ${this.y} IS OUT`)
-    }
-    return out;
 	},
 
 	bearOffspring: function () {
     return new Nag(
-      this.curvature, //+normalDistRand()*MUTATION_SEVERITY,
+      this.curvature+normalDistRand()*MUTATION_SEVERITY,
       this.irrationality+normalDistRand()*MUTATION_SEVERITY,
       this.fecundity+normalDistRand()*MUTATION_SEVERITY,
       this.mortality+normalDistRand()*MUTATION_SEVERITY,
       this.offset+normalDistRand()*MUTATION_SEVERITY,
-      this.niche+normalDistRand()*MUTATION_SEVERITY,
+      this.niche+normalDistRand()*MUTATION_SEVERITY/2,
       { x: this.x, y: this.y },
       this.heading+this.offset
     )
@@ -391,7 +403,7 @@ Nag.prototype = {
 	// in heading goes counterclockwise, like graph quadrants.
 	iteratePosition: function (fracSum) {
     let randomChange = fracSum(this.x, this.y, this.irrationality) * Math.pow(this.irrationality, 2)
-		let dthetadt = this.curvature + randomChange
+		let dthetadt = Math.pow(this.curvature, 3) + randomChange
 
 		// update the heading and position of the nag
 		this.heading += dthetadt
