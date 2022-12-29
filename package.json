@@ -11,7 +11,7 @@
     "request": "^2.88.2"
   },
   "devDependencies": {
-    "webpack": "^3.4.1"
+    "webpack": "^5.75.0"
   },
   "scripts": {
     "build": "webpack"
