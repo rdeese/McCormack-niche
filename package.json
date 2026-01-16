@@ -6,7 +6,7 @@
   "dependencies": {
     "canvas": "^2.6.1",
     "fractal-noise": "^1.0",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.21",
     "open-simplex-noise": "^2.3.0",
     "request": "^2.88.2"
   },
